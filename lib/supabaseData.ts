@@ -308,6 +308,37 @@ export async function insertSession(session: SessionLog, child: ChildProfile) {
   return sessionRowToSessionLog(data as SessionRow);
 }
 
+export async function updateSession(session: SessionLog, child: ChildProfile) {
+  const client = requireSupabase();
+  const tutorId = child.tutorId || (await getCurrentUserId());
+  const sessionId = isUuid(session.id) ? session.id : crypto.randomUUID();
+  const sessionDate = cleanText(session.sessionDate) || new Date().toISOString().slice(0, 10);
+  const row = {
+    id: sessionId,
+    student_id: child.id,
+    tutor_id: tutorId,
+    session_date: sessionDate,
+    subject: session.subject || child.subjects[0] || null,
+    topic: session.topic,
+    summary: session.quickNotes,
+    strengths: [session.keySkillWorkedOn, ...session.sessionFocus].filter(Boolean),
+    struggles: child.struggles ?? [],
+    homework: session.homeworkDetails || null,
+    next_steps: session.specificNextFocus || session.nextLessonFocus.join(", ") || null,
+  };
+
+  const { data, error } = await client
+    .from("sessions")
+    .update(row)
+    .eq("id", sessionId)
+    .eq("student_id", child.id)
+    .eq("tutor_id", tutorId)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return sessionRowToSessionLog(data as SessionRow);
+}
+
 function reportBody(report: ParentReport) {
   return [
     report.todayFocus,
@@ -341,6 +372,13 @@ export async function insertReport(report: ParentReport, session: SessionLog, ch
   const { data, error } = await client.from("reports").upsert(row, { onConflict: "id" }).select("*").single();
   if (error) throw error;
   return data as ReportRow;
+}
+
+export async function deleteReport(reportId: string) {
+  const client = requireSupabase();
+  const tutorId = await getCurrentUserId();
+  const { error } = await client.from("reports").delete().eq("id", reportId).eq("tutor_id", tutorId);
+  if (error) throw error;
 }
 
 export async function listReports(studentId?: string) {

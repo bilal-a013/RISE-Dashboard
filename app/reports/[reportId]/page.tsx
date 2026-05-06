@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Download, Send } from "lucide-react";
+import { Download, Send, Trash2 } from "lucide-react";
 import { ProtectedContent } from "../../../components/rise/AuthProvider";
 import { BrandButton } from "../../../components/rise/BrandButton";
 import { Card } from "../../../components/rise/Card";
@@ -11,7 +11,7 @@ import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
 import { generateParentReport } from "../../../lib/reportGenerator";
-import { getReportBundle } from "../../../lib/supabaseData";
+import { deleteReport, getReportBundle } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
 import type { ChildProfile, ParentReport, SessionLog } from "../../../types/rise";
 
@@ -26,6 +26,9 @@ export default function ReportPage() {
   const params = useParams<{ reportId: string }>();
   const [data, setData] = useState<{ child: ChildProfile; session: SessionLog; report: ParentReport } | null>(null);
   const [status, setStatus] = useState("Loading report...");
+  const [deleteText, setDeleteText] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const isDev = process.env.NODE_ENV !== "production";
 
   useEffect(() => {
     getReportBundle(params.reportId)
@@ -43,6 +46,18 @@ export default function ReportPage() {
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Could not load report."));
   }, [params.reportId]);
+
+  async function confirmDelete() {
+    if (!data) return;
+    try {
+      await deleteReport(data.report.id);
+      setStatus("Report deleted.");
+      setDeleteOpen(false);
+      window.location.href = "/reports";
+    } catch (error) {
+      setStatus(isDev && error instanceof Error ? error.message : "Could not delete report.");
+    }
+  }
 
   if (!data) {
     return (
@@ -103,6 +118,16 @@ export default function ReportPage() {
             >
               <Send className="h-4 w-4" />
               Send to Parent
+            </BrandButton>
+            <BrandButton
+              variant="secondary"
+              onClick={() => {
+                setDeleteText("");
+                setDeleteOpen(true);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete report
             </BrandButton>
           </div>
         </header>
@@ -220,6 +245,35 @@ export default function ReportPage() {
             {JSON.stringify(metadata, null, 2)}
           </pre>
         </details>
+        {deleteOpen ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 print:hidden">
+            <div className="w-full max-w-lg rounded-3xl border border-[#c7c4d7] bg-white p-6 shadow-2xl">
+              <h3 className="text-xl font-semibold text-[#1b1b23]">Delete report</h3>
+              <p className="mt-2 text-sm leading-6 text-[#464554]">This will permanently delete this report from RISE Dashboard.</p>
+              <p className="mt-3 rounded-2xl border border-[#ffdad6] bg-[#fff5f4] p-4 text-sm font-semibold text-[#93000a]">Type DELETE to confirm.</p>
+              <input
+                value={deleteText}
+                onChange={(event) => setDeleteText(event.target.value)}
+                placeholder="DELETE"
+                className="mt-4 h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+              />
+              <div className="mt-5 flex flex-wrap justify-end gap-3">
+                <BrandButton
+                  variant="secondary"
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeleteText("");
+                  }}
+                >
+                  Cancel
+                </BrandButton>
+                <BrandButton onClick={() => (deleteText.trim() === "DELETE" ? confirmDelete() : setStatus("Please type DELETE to confirm."))}>
+                  Confirm Delete
+                </BrandButton>
+              </div>
+            </div>
+          </div>
+        ) : null}
         </div>
         <div className="print:hidden">
           <Footer />

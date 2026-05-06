@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { CalendarDays, FilePlus2, UsersRound } from "lucide-react";
 import { ProtectedContent } from "../../components/rise/AuthProvider";
 import { BrandButton } from "../../components/rise/BrandButton";
@@ -11,7 +12,9 @@ import { TopNav } from "../../components/rise/TopNav";
 import { listSessions, listStudents } from "../../lib/supabaseData";
 import type { ChildProfile, SessionLog } from "../../types/rise";
 
-export default function SessionsPage() {
+function SessionsPageContent() {
+  const searchParams = useSearchParams();
+  const studentId = searchParams.get("studentId");
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [students, setStudents] = useState<ChildProfile[]>([]);
   const [status, setStatus] = useState("Loading sessions...");
@@ -19,7 +22,7 @@ export default function SessionsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [sessionData, studentData] = await Promise.all([listSessions(), listStudents()]);
+        const [sessionData, studentData] = await Promise.all([listSessions(studentId || undefined), listStudents()]);
         setSessions(sessionData);
         setStudents(studentData);
         setStatus("");
@@ -29,7 +32,7 @@ export default function SessionsPage() {
     }
 
     load();
-  }, []);
+  }, [studentId]);
 
   return (
     <ProtectedContent>
@@ -74,7 +77,7 @@ export default function SessionsPage() {
                           View
                         </BrandButton>
                       </Link>
-                      <Link href={`/sessions/new/${session.childId}`}>
+                      <Link href={`/sessions/new/${session.childId}?sessionId=${session.id}`}>
                         <BrandButton>
                           <FilePlus2 className="h-4 w-4" />
                           Log Session
@@ -96,5 +99,13 @@ export default function SessionsPage() {
         <Footer />
       </main>
     </ProtectedContent>
+  );
+}
+
+export default function SessionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <SessionsPageContent />
+    </Suspense>
   );
 }

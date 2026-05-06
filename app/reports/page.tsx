@@ -8,7 +8,7 @@ import { BrandButton } from "../../components/rise/BrandButton";
 import { Card } from "../../components/rise/Card";
 import { Footer } from "../../components/rise/Footer";
 import { TopNav } from "../../components/rise/TopNav";
-import { findStudentByTutorKey, listReports } from "../../lib/supabaseData";
+import { deleteReport, findStudentByTutorKey, listReports } from "../../lib/supabaseData";
 import type { ChildProfile, ReportRow } from "../../types/rise";
 
 type ReportWithRelations = ReportRow & {
@@ -21,6 +21,9 @@ export default function ReportsPage() {
   const [key, setKey] = useState("");
   const [student, setStudent] = useState<ChildProfile | null>(null);
   const [status, setStatus] = useState("Loading reports...");
+  const [deleteTarget, setDeleteTarget] = useState<ReportWithRelations | null>(null);
+  const [deleteText, setDeleteText] = useState("");
+  const isDev = process.env.NODE_ENV !== "production";
 
   async function loadReports() {
     try {
@@ -42,6 +45,18 @@ export default function ReportsPage() {
       setStatus(found ? "" : "No student found for that Tutor Key.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Could not search Tutor Key.");
+    }
+  }
+
+  async function confirmDelete(report: ReportWithRelations) {
+    try {
+      await deleteReport(report.id);
+      setStatus("Report deleted.");
+      setDeleteTarget(null);
+      setDeleteText("");
+      await loadReports();
+    } catch (error) {
+      setStatus(isDev && error instanceof Error ? error.message : "Could not delete report.");
     }
   }
 
@@ -145,6 +160,15 @@ export default function ReportsPage() {
                             {report.sent_status === "sent" ? "Resend" : "Send"}
                           </BrandButton>
                         </a>
+                        <BrandButton
+                          variant="secondary"
+                          onClick={() => {
+                            setDeleteTarget(report);
+                            setDeleteText("");
+                          }}
+                        >
+                          Delete
+                        </BrandButton>
                       </div>
                     </Card>
                   );
@@ -158,6 +182,42 @@ export default function ReportsPage() {
               </Card>
             )}
           </section>
+
+          {deleteTarget ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="w-full max-w-lg rounded-3xl border border-[#c7c4d7] bg-white p-6 shadow-2xl">
+                <h3 className="text-xl font-semibold text-[#1b1b23]">Delete report</h3>
+                <p className="mt-2 text-sm leading-6 text-[#464554]">
+                  This will permanently delete this report from RISE Dashboard.
+                </p>
+                <p className="mt-3 rounded-2xl border border-[#ffdad6] bg-[#fff5f4] p-4 text-sm font-semibold text-[#93000a]">
+                  Type DELETE to confirm.
+                </p>
+                <input
+                  value={deleteText}
+                  onChange={(event) => setDeleteText(event.target.value)}
+                  placeholder="DELETE"
+                  className="mt-4 h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+                />
+                <div className="mt-5 flex flex-wrap justify-end gap-3">
+                  <BrandButton
+                    variant="secondary"
+                    onClick={() => {
+                      setDeleteTarget(null);
+                      setDeleteText("");
+                    }}
+                  >
+                    Cancel
+                  </BrandButton>
+                  <BrandButton
+                    onClick={() => deleteText.trim() === "DELETE" ? confirmDelete(deleteTarget) : setStatus("Please type DELETE to confirm.")}
+                  >
+                    Confirm Delete
+                  </BrandButton>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
         <Footer />
       </main>

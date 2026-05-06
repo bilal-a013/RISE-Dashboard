@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FileText, Save, Sparkles } from "lucide-react";
 import { BrandButton } from "../../../../components/rise/BrandButton";
 import { Card } from "../../../../components/rise/Card";
@@ -12,7 +12,7 @@ import { SegmentedSelector } from "../../../../components/rise/SegmentedSelector
 import { SessionTimeline } from "../../../../components/rise/SessionTimeline";
 import { TopNav } from "../../../../components/rise/TopNav";
 import { generateParentReport } from "../../../../lib/reportGenerator";
-import { getStudent, insertReport, insertSession, listSessions } from "../../../../lib/supabaseData";
+import { getStudent, insertReport, insertSession, listSessions, updateSession } from "../../../../lib/supabaseData";
 import { initialsFromName } from "../../../../lib/tutorKey";
 import type { ChildProfile, HomeworkStatus, Rating, ReportTone, SessionLog, UnderstandingToday } from "../../../../types/rise";
 
@@ -22,11 +22,12 @@ const skillOptions = ["Recall", "Understanding concepts", "Applying formulas", "
 
 export default function NewSessionPage() {
   const params = useParams<{ childId: string }>();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const isDev = process.env.NODE_ENV !== "production";
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [previousSessions, setPreviousSessions] = useState<SessionLog[]>([]);
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().slice(0, 10));
   const [topic, setTopic] = useState("Electromagnetic Induction");
   const [quickNotes, setQuickNotes] = useState("We linked field changes to induced current. Ayaan was guided at first, then became more independent after visual examples. Still needs support explaining current direction. Set exam-style questions 1-8 and start next time with a recap before transformers.");
@@ -49,24 +50,44 @@ export default function NewSessionPage() {
     previousSessionComparison: true,
   });
   const [status, setStatus] = useState("Ready to log");
+  const editingSessionId = searchParams.get("sessionId");
 
   useEffect(() => {
     async function load() {
       try {
         const found = await getStudent(params.childId);
         const previous = await listSessions(found.id);
+        const editingSession = editingSessionId ? previous.find((item) => item.id === editingSessionId) : null;
         setChild(found);
         setPreviousSessions(previous);
-        setTopic(found.subjects[0] || "Session focus");
-        setQuickNotes("");
-        setHomeworkDetails(found.currentHomework || "");
+        if (editingSession) {
+          setSessionId(editingSession.id);
+          setSessionDate(editingSession.sessionDate);
+          setTopic(editingSession.topic);
+          setQuickNotes(editingSession.quickNotes);
+          setSessionFocus(editingSession.sessionFocus.length ? editingSession.sessionFocus : ["Revision"]);
+          setUnderstandingToday(editingSession.understandingToday);
+          setEffortEngagement(editingSession.effortEngagement);
+          setKeySkillWorkedOn(editingSession.keySkillWorkedOn);
+          setHomeworkStatus(editingSession.homeworkStatus);
+          setHomeworkDetails(editingSession.homeworkDetails || "");
+          setNextLessonFocus(editingSession.nextLessonFocus.length ? editingSession.nextLessonFocus : ["Review topic"]);
+          setSpecificNextFocus(editingSession.specificNextFocus || "");
+          setProgressRating(editingSession.progressRating);
+          setConfidenceRating(editingSession.confidenceRating);
+          setReportTone(editingSession.reportTone);
+        } else {
+          setTopic(found.subjects[0] || "Session focus");
+          setQuickNotes("");
+          setHomeworkDetails(found.currentHomework || "");
+        }
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Could not load child profile.");
       }
     }
 
     load();
-  }, [params.childId]);
+  }, [params.childId, editingSessionId]);
 
   const session = useMemo<SessionLog | null>(() => {
     if (!child) return null;
@@ -115,9 +136,14 @@ export default function NewSessionPage() {
   async function saveSession() {
     if (!session) return;
     try {
-      await insertSession(session, child!);
+      if (editingSessionId) {
+        await updateSession({ ...session, id: editingSessionId }, child!);
+        setStatus("Session updated successfully.");
+      } else {
+        await insertSession(session, child!);
+        setStatus("Session saved successfully.");
+      }
       setPreviousSessions(await listSessions(child!.id));
-      setStatus("Session saved successfully.");
     } catch (error) {
       setStatus(isDev && error instanceof Error ? error.message : "Could not save session.");
     }
@@ -126,7 +152,7 @@ export default function NewSessionPage() {
   async function generateReport() {
     if (!child || !session) return;
     try {
-      const savedSession = await insertSession(session, child);
+      const savedSession = editingSessionId ? await updateSession({ ...session, id: editingSessionId }, child) : await insertSession(session, child);
       const report = generateParentReport(child, savedSession, previousSessions);
       await insertReport(report, savedSession, child);
       setStatus("Parent report generated.");

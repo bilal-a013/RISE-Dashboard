@@ -10,7 +10,6 @@ import { Card } from "../../../components/rise/Card";
 import { Footer } from "../../../components/rise/Footer";
 import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
-import { SessionTimeline } from "../../../components/rise/SessionTimeline";
 import { TopNav } from "../../../components/rise/TopNav";
 import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
 import { getStudent, listReports, listSessions } from "../../../lib/supabaseData";
@@ -46,6 +45,7 @@ export default function StudentOverviewPage() {
 
   const latestSession = sessions[0];
   const progressValue = latestSession?.progressRating ?? (student?.confidenceLevel as 1 | 2 | 3 | 4 | 5 | undefined) ?? 3;
+  const visibleSessions = sessions.slice(0, 5);
 
   if (!student) {
     return (
@@ -188,7 +188,42 @@ export default function StudentOverviewPage() {
                 <CalendarDays className="h-5 w-5 text-[#4648d4]" />
                 <h2 className="text-xl font-semibold text-[#1b1b23]">Recent sessions</h2>
               </div>
-              {sessions.length ? <SessionTimeline sessions={sessions} /> : <p className="text-sm text-[#464554]">No sessions logged yet.</p>}
+              {visibleSessions.length ? (
+                <div className="space-y-3">
+                  {visibleSessions.map((session) => (
+                    <Link
+                      key={session.id}
+                      href={`/sessions/new/${student.id}?sessionId=${session.id}`}
+                      className="group block rounded-2xl border border-[#e9e6f3] bg-[#f5f2fe] p-4 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:bg-white hover:shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold uppercase text-[#767586]">
+                            {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(session.sessionDate))}
+                          </p>
+                          <p className="truncate text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
+                          <p className="mt-1 line-clamp-2 text-sm text-[#464554]">{session.quickNotes}</p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          <span className="rounded-full bg-[#e1e0ff] px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-[#4648d4]">
+                            Edit
+                          </span>
+                          <p className="text-[11px] text-[#767586]">{session.homeworkDetails || "No homework set"}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {sessions.length > visibleSessions.length ? (
+                    <Link href={`/sessions?studentId=${student.id}`}>
+                      <BrandButton variant="secondary" className="w-full">
+                        View all sessions
+                      </BrandButton>
+                    </Link>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-sm text-[#464554]">No sessions logged yet.</p>
+              )}
             </Card>
 
             <Card>

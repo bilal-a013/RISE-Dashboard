@@ -48,7 +48,7 @@ export function StudentProfileCard({
       <div className="space-y-3">
         <div className="flex justify-between gap-3 text-sm">
           <span className="text-[#464554]">Focus</span>
-          <span className="font-medium text-[#1b1b23]">{child.subjects.join(" / ")}</span>
+          <span className="max-w-[14rem] text-right font-medium text-[#1b1b23]">{child.subjects.join(" / ")}</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#efecf8]">
@@ -69,7 +69,7 @@ export function StudentProfileCard({
           {lastSession ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(lastSession.sessionDate)) : "No sessions yet"}
         </p>
         <p className="text-sm font-medium text-[#1b1b23]">{lastSession?.topic || "Ready for the first session log."}</p>
-        <p className="mt-1 line-clamp-3 text-sm italic text-[#464554]">"{lastSession?.quickNotes || "Ready for the first session log."}"</p>
+        <p className="mt-1 line-clamp-2 text-sm italic text-[#464554]">"{lastSession?.quickNotes || "Ready for the first session log."}"</p>
       </div>
 
       <div className="mt-auto grid grid-cols-2 gap-2 md:grid-cols-4">
