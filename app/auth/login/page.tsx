@@ -41,6 +41,11 @@ export default function LoginPage() {
         });
         if (error) throw error;
         if (data.session && data.user) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+          if (sessionError) throw sessionError;
           await upsertProfile(fullName || email, email);
           router.push("/dashboard");
           return;
