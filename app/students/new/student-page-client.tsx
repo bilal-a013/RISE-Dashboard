@@ -10,6 +10,7 @@ import { ChipSelector } from "../../../components/rise/ChipSelector";
 import { Footer } from "../../../components/rise/Footer";
 import { TopNav } from "../../../components/rise/TopNav";
 import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
+import { useToast } from "../../../components/rise/ToastProvider";
 import { getStudent, upsertStudent } from "../../../lib/supabaseData";
 import { generateTutorKey } from "../../../lib/tutorKey";
 import type { ChildProfile } from "../../../types/rise";
@@ -106,6 +107,7 @@ const reportPreferenceOptions: Array<{ value: NonNullable<ChildProfile["preferre
 export default function NewStudentPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
@@ -236,8 +238,10 @@ export default function NewStudentPageClient() {
       setEditingId(child.id);
       setTutorKey(child.tutorKey);
       setStatus("Profile saved to Supabase");
+      toast({ title: "Profile saved", description: child.fullName, variant: "success" });
       router.push("/students?saved=1");
     } catch (error) {
+      toast({ title: "Could not save profile", description: error instanceof Error ? error.message : "Check the form and try again.", variant: "error" });
       setStatus(isDev && error instanceof Error ? error.message : "Could not save profile.");
     }
   }
@@ -247,6 +251,7 @@ export default function NewStudentPageClient() {
       const child = await upsertStudent(buildChild());
       router.push(`/sessions/new/${child.id}`);
     } catch (error) {
+      toast({ title: "Could not save profile", description: error instanceof Error ? error.message : "Check the form and try again.", variant: "error" });
       setStatus(isDev && error instanceof Error ? error.message : "Could not save profile.");
     }
   }

@@ -11,6 +11,7 @@ import { Footer } from "../../../components/rise/Footer";
 import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
+import { useToast } from "../../../components/rise/ToastProvider";
 import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
 import { getStudent, listReports, listSessions } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
@@ -22,6 +23,7 @@ export default function StudentOverviewPage() {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [status, setStatus] = useState("Loading student...");
+  const { toast } = useToast();
 
   useEffect(() => {
     async function load() {
@@ -50,7 +52,7 @@ export default function StudentOverviewPage() {
   if (!student) {
     return (
       <ProtectedContent>
-        <main className="min-h-screen bg-[#fcf8ff]">
+        <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
           <TopNav />
           <div className="mx-auto max-w-7xl px-6 py-10">
             <p className="rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p>
@@ -63,7 +65,7 @@ export default function StudentOverviewPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff]">
+      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -118,7 +120,10 @@ export default function StudentOverviewPage() {
                 <div className="w-full max-w-sm">
                   <TutorKeyBadge
                     tutorKey={student.tutorKey}
-                    onCopy={() => setStatus("Tutor key copied")}
+                    onCopy={() => {
+                      setStatus("Tutor key copied.");
+                      toast({ title: "Tutor key copied", description: `${student.fullName}'s key is on the clipboard.`, variant: "success" });
+                    }}
                   />
                 </div>
               </div>

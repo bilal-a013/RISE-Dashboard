@@ -11,6 +11,7 @@ import { confidenceOptions, progressOptions, RatingSelector } from "../../../../
 import { SegmentedSelector } from "../../../../components/rise/SegmentedSelector";
 import { SessionTimeline } from "../../../../components/rise/SessionTimeline";
 import { TopNav } from "../../../../components/rise/TopNav";
+import { useToast } from "../../../../components/rise/ToastProvider";
 import { generateParentReport } from "../../../../lib/reportGenerator";
 import { getStudent, insertReport, insertSession, listSessions, updateSession } from "../../../../lib/supabaseData";
 import { initialsFromName } from "../../../../lib/tutorKey";
@@ -24,6 +25,7 @@ export default function NewSessionPage() {
   const params = useParams<{ childId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
   const isDev = process.env.NODE_ENV !== "production";
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [previousSessions, setPreviousSessions] = useState<SessionLog[]>([]);
@@ -139,13 +141,17 @@ export default function NewSessionPage() {
       if (editingSessionId) {
         await updateSession({ ...session, id: editingSessionId }, child!);
         setStatus("Session updated successfully.");
+        toast({ title: "Session updated", description: "The session changes were saved to Supabase.", variant: "success" });
       } else {
         await insertSession(session, child!);
         setStatus("Session saved successfully.");
+        toast({ title: "Session saved", description: "The session was saved to Supabase.", variant: "success" });
       }
       setPreviousSessions(await listSessions(child!.id));
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not save session.");
+      const message = error instanceof Error ? error.message : "Could not save session.";
+      setStatus(isDev ? message : "Could not save session.");
+      toast({ title: "Could not save session", description: isDev ? message : "Please try again.", variant: "error" });
     }
   }
 
@@ -156,16 +162,19 @@ export default function NewSessionPage() {
       const report = generateParentReport(child, savedSession, previousSessions);
       await insertReport(report, savedSession, child);
       setStatus("Parent report generated.");
+      toast({ title: "Report generated", description: "The parent report draft was saved to Supabase.", variant: "success" });
       router.push(`/reports/${report.id}`);
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not generate report.");
+      const message = error instanceof Error ? error.message : "Could not generate report.";
+      setStatus(isDev ? message : "Could not generate report.");
+      toast({ title: "Could not generate report", description: isDev ? message : "Please try again.", variant: "error" });
     }
   }
 
   if (!child) return null;
 
   return (
-    <main className="min-h-screen bg-[#fcf8ff]">
+    <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
       <TopNav />
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8">

@@ -11,6 +11,7 @@ import { Footer } from "../../../components/rise/Footer";
 import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
+import { useToast } from "../../../components/rise/ToastProvider";
 import { generateParentReport } from "../../../lib/reportGenerator";
 import { deleteReport, getReportBundle, markReportSent } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
@@ -124,6 +125,7 @@ export default function ReportPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [copyStatus, setCopyStatus] = useState("");
+  const { toast } = useToast();
   const isDev = process.env.NODE_ENV !== "production";
 
   useEffect(() => {
@@ -164,10 +166,13 @@ export default function ReportPage() {
     try {
       await deleteReport(data.report.id);
       setStatus("Report deleted.");
+      toast({ title: "Report deleted", description: `${data.report.title} was removed from Supabase.`, variant: "success" });
       setDeleteOpen(false);
       window.location.href = "/reports";
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not delete report.");
+      const message = error instanceof Error ? error.message : "Could not delete report.";
+      setStatus(isDev ? message : "Could not delete report.");
+      toast({ title: "Could not delete report", description: isDev ? message : "Please try again.", variant: "error" });
     }
   }
 
@@ -177,9 +182,12 @@ export default function ReportPage() {
       const updated = await markReportSent(data.report.id, data.child.parentEmail || null);
       void updated;
       setStatus("Marked as sent.");
+      toast({ title: "Report marked as sent", description: "The report status was updated in Supabase.", variant: "success" });
       setSendOpen(false);
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not update sent status.");
+      const message = error instanceof Error ? error.message : "Could not update sent status.";
+      setStatus(isDev ? message : "Could not update sent status.");
+      toast({ title: "Could not update sent status", description: isDev ? message : "Please try again.", variant: "error" });
     }
   }
 
@@ -196,8 +204,10 @@ export default function ReportPage() {
         await navigator.clipboard.writeText(emailHtml);
       }
       setCopyStatus("Email copied.");
+      toast({ title: "Styled email copied", description: "Paste it into Gmail for best formatting.", variant: "success" });
     } catch {
       setCopyStatus("Could not copy email.");
+      toast({ title: "Could not copy email", description: "Try again or copy the plain text version.", variant: "error" });
     }
   }
 
@@ -228,7 +238,7 @@ export default function ReportPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff]">
+      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
         <TopNav />
         <div className="report-print-root mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between print:hidden">
@@ -453,8 +463,10 @@ export default function ReportPage() {
                             try {
                               await navigator.clipboard.writeText(emailText);
                               setCopyStatus("Plain text copied.");
+                              toast({ title: "Plain text copied", description: "A clean version of the email is on your clipboard.", variant: "success" });
                             } catch {
                               setCopyStatus("Could not copy plain text.");
+                              toast({ title: "Could not copy plain text", description: "Please try again.", variant: "error" });
                             }
                           }}
                         >

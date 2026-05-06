@@ -9,7 +9,24 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('rise-dashboard-theme');
+                  var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  var theme = stored === 'dark' || stored === 'light' ? stored : system;
+                  if (theme === 'dark') document.documentElement.classList.add('dark');
+                  document.documentElement.dataset.theme = theme;
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

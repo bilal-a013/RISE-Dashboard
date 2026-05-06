@@ -8,6 +8,7 @@ import { BrandButton } from "../../../../components/rise/BrandButton";
 import { Card } from "../../../../components/rise/Card";
 import { Footer } from "../../../../components/rise/Footer";
 import { TopNav } from "../../../../components/rise/TopNav";
+import { useToast } from "../../../../components/rise/ToastProvider";
 import { generateParentReport } from "../../../../lib/reportGenerator";
 import { getReportBundle, updateReport } from "../../../../lib/supabaseData";
 import type { ParentReport, SessionLog } from "../../../../types/rise";
@@ -24,6 +25,7 @@ export default function EditReportPage() {
   const [sessionDate, setSessionDate] = useState("");
   const [status, setStatus] = useState("Loading report...");
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
   const isDev = process.env.NODE_ENV !== "production";
 
   useEffect(() => {
@@ -63,10 +65,13 @@ export default function EditReportPage() {
         sent_status: sentStatus,
         sent_to: sentTo.trim() || null,
       });
+      toast({ title: "Report updated successfully", description: "The report changes were saved to Supabase.", variant: "success" });
       router.push(`/reports/${params.reportId}`);
       router.refresh();
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not update report.");
+      const message = error instanceof Error ? error.message : "Could not update report.";
+      setStatus(isDev ? message : "Could not update report.");
+      toast({ title: "Could not update report", description: isDev ? message : "Please try again.", variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -74,7 +79,7 @@ export default function EditReportPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff]">
+      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
         <TopNav />
         <div className="mx-auto max-w-4xl px-6 py-10">
           <header className="mb-8">

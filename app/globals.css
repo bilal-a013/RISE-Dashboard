@@ -6,6 +6,10 @@ html {
   scroll-behavior: smooth;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   background: #fcf8ff;
   color: #1b1b23;
@@ -15,6 +19,116 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+@keyframes rise-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rise-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise-toast {
+  animation: rise-toast-in 160ms ease-out;
+}
+
+.animate-rise-page {
+  animation: rise-page-in 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.dark body {
+  background: #0b1020;
+  color: #e2e8f0;
+}
+
+.dark .bg-white,
+.dark [class*="bg-[#fcf8ff]"],
+.dark [class*="bg-[#f5f2fe]"],
+.dark [class*="bg-[#efecf8]"],
+.dark [class*="bg-[#f8fafc]"] {
+  background-color: #111827 !important;
+}
+
+.dark [class*="bg-[#e1e0ff]"] {
+  background-color: #3730a3 !important;
+}
+
+.dark [class*="bg-[#6063ee]"],
+.dark [class*="bg-[#4648d4]"],
+.dark [class*="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]"] {
+  filter: saturate(1.05) brightness(1.05);
+}
+
+.dark .border,
+.dark [class*="border-[#c7c4d7]"],
+.dark [class*="border-[#e9e6f3]"] {
+  border-color: #334155 !important;
+}
+
+.dark [class*="text-[#1b1b23]"] {
+  color: #f8fafc !important;
+}
+
+.dark [class*="text-[#464554]"] {
+  color: #cbd5e1 !important;
+}
+
+.dark [class*="text-[#767586]"] {
+  color: #94a3b8 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark a {
+  color: inherit;
+}
+
+.dark .shadow-sm,
+.dark .shadow-lg,
+.dark .shadow-xl {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
 }
 
 @media print {

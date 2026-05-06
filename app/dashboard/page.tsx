@@ -9,6 +9,7 @@ import { Footer } from "../../components/rise/Footer";
 import { ProtectedContent } from "../../components/rise/AuthProvider";
 import { StudentProfileCard } from "../../components/rise/StudentProfileCard";
 import { TopNav } from "../../components/rise/TopNav";
+import { useToast } from "../../components/rise/ToastProvider";
 import { deleteStudent, listReports, listSessions, listStudents } from "../../lib/supabaseData";
 import type { ChildProfile, ReportRow, SessionLog } from "../../types/rise";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ function startOfWeek(date: Date) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [students, setStudents] = useState<ChildProfile[]>([]);
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
@@ -62,7 +64,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff]">
+      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <section className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -177,8 +179,17 @@ export default function DashboardPage() {
                   onEdit={() => router.push(`/students/new?childId=${child.id}`)}
                   onRemove={async () => {
                     if (!confirm(`Remove ${child.fullName}?`)) return;
-                    await deleteStudent(child.id);
-                    await loadDashboard();
+                    try {
+                      await deleteStudent(child.id);
+                      toast({ title: "Profile deleted", description: `${child.fullName} was removed from RISE Dashboard.`, variant: "success" });
+                      await loadDashboard();
+                    } catch (error) {
+                      toast({
+                        title: "Could not delete profile",
+                        description: error instanceof Error ? error.message : "Please try again.",
+                        variant: "error",
+                      });
+                    }
                   }}
                 />
               ))}

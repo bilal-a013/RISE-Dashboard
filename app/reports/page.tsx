@@ -7,6 +7,7 @@ import { ProtectedContent } from "../../components/rise/AuthProvider";
 import { BrandButton } from "../../components/rise/BrandButton";
 import { Card } from "../../components/rise/Card";
 import { Footer } from "../../components/rise/Footer";
+import { useToast } from "../../components/rise/ToastProvider";
 import { TopNav } from "../../components/rise/TopNav";
 import { deleteReport, findStudentByTutorKey, listReports } from "../../lib/supabaseData";
 import type { ChildProfile, ReportRow } from "../../types/rise";
@@ -23,6 +24,7 @@ export default function ReportsPage() {
   const [status, setStatus] = useState("Loading reports...");
   const [deleteTarget, setDeleteTarget] = useState<ReportWithRelations | null>(null);
   const [deleteText, setDeleteText] = useState("");
+  const { toast } = useToast();
   const isDev = process.env.NODE_ENV !== "production";
 
   async function loadReports() {
@@ -52,17 +54,20 @@ export default function ReportsPage() {
     try {
       await deleteReport(report.id);
       setStatus("Report deleted.");
+      toast({ title: "Report deleted", description: `${report.title} was removed from RISE Dashboard.`, variant: "success" });
       setDeleteTarget(null);
       setDeleteText("");
       await loadReports();
     } catch (error) {
-      setStatus(isDev && error instanceof Error ? error.message : "Could not delete report.");
+      const message = error instanceof Error ? error.message : "Could not delete report.";
+      setStatus(isDev ? message : "Could not delete report.");
+      toast({ title: "Could not delete report", description: isDev ? message : "Please try again.", variant: "error" });
     }
   }
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff]">
+      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <header className="mb-8">

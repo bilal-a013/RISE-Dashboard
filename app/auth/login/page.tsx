@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { BrandButton } from "../../../components/rise/BrandButton";
 import { Footer } from "../../../components/rise/Footer";
+import { useToast } from "../../../components/rise/ToastProvider";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { upsertProfile } from "../../../lib/supabaseData";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,16 +42,17 @@ export default function LoginPage() {
           },
         });
         if (error) throw error;
-        if (data.session && data.user) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-          });
-          if (sessionError) throw sessionError;
-          await upsertProfile(fullName || email, email);
-          router.push("/dashboard");
-          return;
-        }
+          if (data.session && data.user) {
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token,
+            });
+            if (sessionError) throw sessionError;
+            await upsertProfile(fullName || email, email);
+            toast({ title: "Login successful", description: "Welcome back to RISE Dashboard.", variant: "success" });
+            router.push("/dashboard");
+            return;
+          }
         setStatus("Account created. Check your email to confirm the account, then log in.");
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -57,17 +60,20 @@ export default function LoginPage() {
         if (data.user) {
           await upsertProfile(data.user.user_metadata?.full_name || fullName || email, email);
         }
+        toast({ title: "Login successful", description: "Welcome back to RISE Dashboard.", variant: "success" });
         router.push("/dashboard");
       }
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+      const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      setStatus(message);
+      toast({ title: "Authentication failed", description: message, variant: "error" });
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-[#fcf8ff]">
+    <main className="flex min-h-screen flex-col bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
       <section className="flex flex-1 items-center justify-center px-6 py-16">
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">

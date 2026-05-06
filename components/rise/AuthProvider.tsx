@@ -4,6 +4,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { useToast } from "./ToastProvider";
 
 type AuthContextValue = {
   session: Session | null;
@@ -18,6 +19,7 @@ const publicPaths = ["/auth/login", "/auth/google"];
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -70,10 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await supabase.auth.signOut();
         }
         setSession(null);
+        toast({ title: "Logout successful", variant: "success" });
         router.replace("/auth/login");
       },
     }),
-    [loading, router, session]
+    [loading, router, session, toast]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
