@@ -40,16 +40,20 @@ export default function LoginPage() {
           },
         });
         if (error) throw error;
-        if (data.user) {
+        if (data.session && data.user) {
           await upsertProfile(fullName || email, email);
+          router.push("/dashboard");
+          return;
         }
-        setStatus(data.session ? "Account created." : "Account created. Check your email if confirmation is enabled.");
+        setStatus("Account created. Check your email to confirm the account, then log in.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (data.user) {
+          await upsertProfile(data.user.user_metadata?.full_name || fullName || email, email);
+        }
+        router.push("/dashboard");
       }
-
-      router.push("/dashboard");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Something went wrong. Please try again.");
     } finally {
@@ -91,7 +95,7 @@ export default function LoginPage() {
 
             {!isSupabaseConfigured ? (
               <div className="mb-5 rounded-xl border border-[#c7c4d7] bg-[#f5f2fe] p-4 text-sm leading-6 text-[#464554]">
-                Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to enable authentication.
+                Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to enable authentication.
               </div>
             ) : null}
 
