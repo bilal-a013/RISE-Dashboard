@@ -7,7 +7,8 @@ export function generateTutorKey(fullName: string): string {
       .map((part) => part[0]?.toUpperCase())
       .join("") || "ST";
 
-  const suffix = Math.floor(10 + Math.random() * 90);
+  const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const suffix = Array.from({ length: 2 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
   return `RISE-${initials}${suffix}`;
 }
 

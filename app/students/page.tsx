@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Eye, FilePlus2, Pencil, Plus, UsersRound } from "lucide-react";
 import { ProtectedContent } from "../../components/rise/AuthProvider";
 import { BrandButton } from "../../components/rise/BrandButton";
@@ -11,10 +12,12 @@ import { TopNav } from "../../components/rise/TopNav";
 import { listSessions, listStudents } from "../../lib/supabaseData";
 import type { ChildProfile, SessionLog } from "../../types/rise";
 
-export default function StudentsPage() {
+function StudentsPageContent() {
+  const searchParams = useSearchParams();
   const [students, setStudents] = useState<ChildProfile[]>([]);
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [status, setStatus] = useState("Loading students...");
+  const saved = searchParams.get("saved") === "1";
 
   useEffect(() => {
     async function load() {
@@ -49,6 +52,7 @@ export default function StudentsPage() {
             </Link>
           </header>
 
+          {saved ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-[#f5f2fe] p-4 text-sm font-semibold text-[#4648d4]">Profile saved successfully.</p> : null}
           {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
 
           {students.length ? (
@@ -61,10 +65,11 @@ export default function StudentsPage() {
                       <div className="mb-2 flex flex-wrap items-center gap-2">
                         <h2 className="text-xl font-semibold text-[#1b1b23]">{student.fullName}</h2>
                         <span className="rounded-full bg-[#e1e0ff] px-3 py-1 text-xs font-bold text-[#4648d4]">{student.status || "active"}</span>
+                        <span className="rounded-full border border-[#c7c4d7] bg-white px-3 py-1 text-xs font-mono font-bold tracking-widest text-[#4648d4]">{student.tutorKey}</span>
                       </div>
                       <p className="text-sm text-[#464554]">{student.yearGroup} / {student.subjects.join(", ") || "No subjects set"}</p>
                       <p className="mt-2 text-sm font-semibold text-[#4648d4]">{student.currentWorkingLevel} {"->"} {student.targetLevel}</p>
-                      <p className="mt-2 text-sm text-[#464554]">
+                      <p className="mt-3 inline-flex rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] px-3 py-2 text-sm font-semibold text-[#464554]">
                         Last session: {lastSession ? `${lastSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(lastSession.sessionDate))}` : "No sessions yet"}
                       </p>
                     </div>
@@ -106,5 +111,13 @@ export default function StudentsPage() {
         <Footer />
       </main>
     </ProtectedContent>
+  );
+}
+
+export default function StudentsPage() {
+  return (
+    <Suspense fallback={null}>
+      <StudentsPageContent />
+    </Suspense>
   );
 }

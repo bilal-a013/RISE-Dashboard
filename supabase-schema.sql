@@ -14,6 +14,7 @@ create table if not exists students (
   full_name text not null,
   preferred_name text,
   age int,
+  education_stage text,
   year_group text,
   pronouns text,
   school text,
@@ -24,14 +25,56 @@ create table if not exists students (
   goals text,
   strengths text[] default '{}',
   struggles text[] default '{}',
+  current_topics text[] default '{}',
+  learning_style text,
   parent_name text,
+  parent_relationship text,
   parent_email text,
   parent_phone text,
+  parent_report_preference text,
+  current_homework text,
+  homework_due_date date,
+  session_frequency text,
+  long_term_target text,
+  next_session_focus text,
+  tutor_notes text,
   tutor_key text unique not null,
   status text default 'active',
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );
+
+alter table students add column if not exists education_stage text;
+alter table students add column if not exists full_name text;
+alter table students add column if not exists preferred_name text;
+alter table students add column if not exists age int;
+alter table students add column if not exists year_group text;
+alter table students add column if not exists pronouns text;
+alter table students add column if not exists school text;
+alter table students add column if not exists subjects text[] default '{}';
+alter table students add column if not exists exam_board text;
+alter table students add column if not exists current_grade text;
+alter table students add column if not exists target_grade text;
+alter table students add column if not exists goals text;
+alter table students add column if not exists strengths text[] default '{}';
+alter table students add column if not exists struggles text[] default '{}';
+alter table students add column if not exists current_topics text[] default '{}';
+alter table students add column if not exists learning_style text;
+alter table students add column if not exists parent_name text;
+alter table students add column if not exists parent_relationship text;
+alter table students add column if not exists parent_email text;
+alter table students add column if not exists parent_phone text;
+alter table students add column if not exists parent_report_preference text;
+alter table students add column if not exists current_homework text;
+alter table students add column if not exists homework_due_date date;
+alter table students add column if not exists session_frequency text;
+alter table students add column if not exists long_term_target text;
+alter table students add column if not exists next_session_focus text;
+alter table students add column if not exists tutor_notes text;
+alter table students add column if not exists tutor_key text;
+alter table students add column if not exists status text default 'active';
+alter table students add column if not exists created_at timestamp with time zone default now();
+alter table students add column if not exists updated_at timestamp with time zone default now();
 
 create table if not exists sessions (
   id uuid primary key default gen_random_uuid(),
@@ -71,6 +114,16 @@ create table if not exists parent_replies (
   received_at timestamp with time zone default now(),
   gmail_thread_id text
 );
+
+create or replace function set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
 
 alter table profiles enable row level security;
 alter table students enable row level security;
@@ -165,7 +218,13 @@ using (
 );
 
 create index if not exists students_tutor_id_idx on students(tutor_id);
+create unique index if not exists students_tutor_key_unique_idx on students(tutor_key);
 create index if not exists sessions_tutor_id_idx on sessions(tutor_id);
 create index if not exists sessions_student_id_idx on sessions(student_id);
 create index if not exists reports_tutor_id_idx on reports(tutor_id);
 create index if not exists reports_student_id_idx on reports(student_id);
+
+drop trigger if exists set_students_updated_at on students;
+create trigger set_students_updated_at
+before update on students
+for each row execute function set_updated_at();

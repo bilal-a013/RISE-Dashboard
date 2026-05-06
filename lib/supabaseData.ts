@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { generateTutorKey } from "./tutorKey";
 import type { ChildProfile, ParentReport, ReportRow, SessionLog, SessionRow, StudentRow } from "../types/rise";
 
 function requireSupabase() {
@@ -6,6 +7,59 @@ function requireSupabase() {
     throw new Error("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.");
   }
   return supabase;
+}
+
+function cleanText(value: string | undefined | null) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : null;
+}
+
+function cleanArray(values: string[] | undefined | null) {
+  return (values ?? []).map((item) => item.trim()).filter(Boolean);
+}
+
+function isTutorKeyConflict(error: { code?: string; message?: string; details?: string } | null) {
+  if (!error) return false;
+  const text = `${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
+  return error.code === "23505" && text.includes("tutor_key");
+}
+
+function formatSupabaseError(error: { code?: string; message?: string; details?: string; hint?: string } | null) {
+  if (!error) return "Could not save profile.";
+
+  const parts = [error.message, error.details, error.hint].filter(Boolean);
+  const suffix = parts.length ? ` ${parts.join(" ")}` : "";
+  return error.code ? `${error.code}:${suffix}`.trim() : suffix.trim() || "Could not save profile.";
+}
+
+async function getExistingTutorKeys(client: ReturnType<typeof requireSupabase>, tutorId: string, excludeStudentId?: string) {
+  let query = client.from("students").select("id, tutor_key").eq("tutor_id", tutorId);
+  if (excludeStudentId) {
+    query = query.neq("id", excludeStudentId);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return new Set(((data ?? []) as Array<{ tutor_key: string | null }>).map((row) => row.tutor_key?.trim().toUpperCase()).filter(Boolean) as string[]);
+}
+
+async function generateUniqueTutorKey(client: ReturnType<typeof requireSupabase>, tutorId: string, fullName: string, excludeStudentId?: string) {
+  const existingKeys = await getExistingTutorKeys(client, tutorId, excludeStudentId);
+  const baseKey = generateTutorKey(fullName);
+
+  if (!existingKeys.has(baseKey)) {
+    return baseKey;
+  }
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const nextKey = generateTutorKey(fullName);
+    if (!existingKeys.has(nextKey)) {
+      return nextKey;
+    }
+  }
+
+  return `${baseKey}${Math.floor(10 + Math.random() * 90)}`;
 }
 
 export async function getCurrentUserId() {
@@ -40,19 +94,35 @@ export function studentRowToChildProfile(row: StudentRow): ChildProfile {
     preferredName: row.preferred_name ?? undefined,
     age: row.age ?? undefined,
     pronouns: row.pronouns ?? undefined,
+    educationStage: row.education_stage ?? undefined,
     yearGroup: row.year_group || "Year group not set",
     school: row.school ?? undefined,
     subjects: row.subjects ?? [],
     examBoard: row.exam_board ?? undefined,
     currentWorkingLevel: row.current_grade || "Current grade not set",
     targetLevel: row.target_grade || "Target grade not set",
+    currentGrade: row.current_grade ?? undefined,
+    targetGrade: row.target_grade ?? undefined,
     mainGoals: row.goals ?? undefined,
     confidenceLevel: 3,
     strengths: row.strengths ?? [],
     struggles: row.struggles ?? [],
+    currentTopics: row.current_topics ?? [],
+    learningStyle: row.learning_style ?? undefined,
     parentName: row.parent_name || "Parent not set",
+    parentRelationship: row.parent_relationship ?? undefined,
     parentEmail: row.parent_email || "",
     parentPhone: row.parent_phone ?? undefined,
+    parentReportPreference: (row.parent_report_preference as ChildProfile["parentReportPreference"]) ?? undefined,
+    preferredReportMethod: (row.parent_report_preference as ChildProfile["preferredReportMethod"]) ?? undefined,
+    currentHomework: row.current_homework ?? undefined,
+    homeworkDueDate: row.homework_due_date ?? undefined,
+    sessionFrequency: row.session_frequency ?? undefined,
+    longTermGoal: row.long_term_target ?? undefined,
+    longTermTarget: row.long_term_target ?? undefined,
+    nextSessionFocus: row.next_session_focus ?? undefined,
+    tutorNotes: row.tutor_notes ?? undefined,
+    currentHomeWork: row.current_homework ?? undefined,
     status: row.status || "active",
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
@@ -94,9 +164,11 @@ export function sessionRowToSessionLog(row: SessionRow): SessionLog {
 
 export async function listStudents() {
   const client = requireSupabase();
+  const tutorId = await getCurrentUserId();
   const { data, error } = await client
     .from("students")
     .select("*")
+    .eq("tutor_id", tutorId)
     .order("updated_at", { ascending: false });
   if (error) throw error;
   return ((data ?? []) as StudentRow[]).map(studentRowToChildProfile);
@@ -104,16 +176,19 @@ export async function listStudents() {
 
 export async function getStudent(studentId: string) {
   const client = requireSupabase();
-  const { data, error } = await client.from("students").select("*").eq("id", studentId).single();
+  const tutorId = await getCurrentUserId();
+  const { data, error } = await client.from("students").select("*").eq("id", studentId).eq("tutor_id", tutorId).single();
   if (error) throw error;
   return studentRowToChildProfile(data as StudentRow);
 }
 
 export async function findStudentByTutorKey(tutorKey: string) {
   const client = requireSupabase();
+  const tutorId = await getCurrentUserId();
   const { data, error } = await client
     .from("students")
     .select("*")
+    .eq("tutor_id", tutorId)
     .eq("tutor_key", tutorKey.trim().toUpperCase())
     .maybeSingle();
   if (error) throw error;
@@ -124,44 +199,81 @@ export async function upsertStudent(child: ChildProfile) {
   const client = requireSupabase();
   const tutorId = await getCurrentUserId();
   const now = new Date().toISOString();
-  const row = {
+  const { data: existingStudent, error: existingError } = await client.from("students").select("id").eq("id", child.id).maybeSingle();
+  if (existingError && existingError.code !== "PGRST116") {
+    throw existingError;
+  }
+  const isEditing = Boolean(existingStudent);
+  const tutorKey = child.tutorKey?.trim().toUpperCase() || (await generateUniqueTutorKey(client, tutorId, child.fullName, child.id));
+  const rowBase = {
     id: child.id || crypto.randomUUID(),
     tutor_id: tutorId,
     full_name: child.fullName,
-    preferred_name: child.preferredName || null,
+    preferred_name: cleanText(child.preferredName),
     age: child.age ?? null,
+    education_stage: cleanText(child.educationStage),
     year_group: child.yearGroup,
-    pronouns: child.pronouns || null,
-    school: child.school || null,
-    subjects: child.subjects,
-    exam_board: child.examBoard || null,
+    pronouns: cleanText(child.pronouns),
+    school: cleanText(child.school),
+    subjects: cleanArray(child.subjects),
+    exam_board: cleanText(child.examBoard),
     current_grade: child.currentWorkingLevel,
     target_grade: child.targetLevel,
-    goals: child.mainGoals || child.longTermGoal || null,
-    strengths: child.strengths ?? [],
-    struggles: child.struggles ?? [],
-    parent_name: child.parentName,
-    parent_email: child.parentEmail,
-    parent_phone: child.parentPhone || null,
-    tutor_key: child.tutorKey,
+    goals: cleanText(child.mainGoals),
+    strengths: cleanArray(child.strengths),
+    struggles: cleanArray(child.struggles),
+    current_topics: cleanArray(child.currentTopics),
+    learning_style: cleanText(child.learningStyle),
+    parent_name: cleanText(child.parentName) || "",
+    parent_relationship: cleanText(child.parentRelationship),
+    parent_email: cleanText(child.parentEmail) || "",
+    parent_phone: cleanText(child.parentPhone),
+    parent_report_preference: child.parentReportPreference || child.preferredReportMethod || null,
+    current_homework: cleanText(child.currentHomework),
+    homework_due_date: cleanText(child.homeworkDueDate) || null,
+    session_frequency: cleanText(child.sessionFrequency),
+    long_term_target: cleanText(child.longTermTarget || child.longTermGoal),
+    next_session_focus: cleanText(child.nextSessionFocus),
+    tutor_notes: cleanText(child.tutorNotes),
+    tutor_key: tutorKey,
     status: child.status || "active",
     updated_at: now,
   };
 
-  const { data, error } = await client.from("students").upsert(row, { onConflict: "id" }).select("*").single();
-  if (error) throw error;
-  return studentRowToChildProfile(data as StudentRow);
+  let nextTutorKey = rowBase.tutor_key;
+  let lastError: { code?: string; message?: string; details?: string } | null = null;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const row = { ...rowBase, tutor_key: nextTutorKey };
+    const query = isEditing ? client.from("students").upsert(row, { onConflict: "id" }) : client.from("students").insert(row);
+    const { data, error } = await query.select("*").single();
+    if (!error && data) {
+      return studentRowToChildProfile(data as StudentRow);
+    }
+
+    lastError = error;
+    if (isTutorKeyConflict(error) && attempt < 2) {
+      nextTutorKey = await generateUniqueTutorKey(client, tutorId, child.fullName, child.id);
+      continue;
+    }
+
+    throw new Error(formatSupabaseError(error));
+  }
+
+  throw new Error(formatSupabaseError(lastError));
 }
 
 export async function deleteStudent(studentId: string) {
   const client = requireSupabase();
-  const { error } = await client.from("students").delete().eq("id", studentId);
+  const tutorId = await getCurrentUserId();
+  const { error } = await client.from("students").delete().eq("id", studentId).eq("tutor_id", tutorId);
   if (error) throw error;
 }
 
 export async function listSessions(studentId?: string) {
   const client = requireSupabase();
-  let query = client.from("sessions").select("*").order("session_date", { ascending: false });
+  const tutorId = await getCurrentUserId();
+  let query = client.from("sessions").select("*").eq("tutor_id", tutorId).order("session_date", { ascending: false });
   if (studentId) query = query.eq("student_id", studentId);
   const { data, error } = await query;
   if (error) throw error;
@@ -226,9 +338,11 @@ export async function insertReport(report: ParentReport, session: SessionLog, ch
 
 export async function listReports() {
   const client = requireSupabase();
+  const tutorId = await getCurrentUserId();
   const { data, error } = await client
     .from("reports")
     .select("*, students(full_name, parent_email), sessions(subject, topic, session_date)")
+    .eq("tutor_id", tutorId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Array<ReportRow & { students?: { full_name?: string; parent_email?: string }; sessions?: { subject?: string; topic?: string; session_date?: string } }>;
@@ -236,7 +350,8 @@ export async function listReports() {
 
 export async function getReportBundle(reportId: string) {
   const client = requireSupabase();
-  const { data: report, error: reportError } = await client.from("reports").select("*").eq("id", reportId).single();
+  const tutorId = await getCurrentUserId();
+  const { data: report, error: reportError } = await client.from("reports").select("*").eq("id", reportId).eq("tutor_id", tutorId).single();
   if (reportError) throw reportError;
 
   const reportRow = report as ReportRow;
