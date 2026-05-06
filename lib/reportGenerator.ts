@@ -80,7 +80,7 @@ export function generateParentReport(
         : `${child.preferredName || child.fullName} will benefit from more reassurance and smaller practice steps.`;
 
   return {
-    id: `report-${session.id}`,
+    id: crypto.randomUUID(),
     childId: child.id,
     sessionLogId: session.id,
     title: `${child.fullName} Session Report`,

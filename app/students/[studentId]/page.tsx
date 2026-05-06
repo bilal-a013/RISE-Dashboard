@@ -1,0 +1,223 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { BookOpen, CalendarDays, FilePlus2, Pencil, UserRound } from "lucide-react";
+import { ProtectedContent } from "../../../components/rise/AuthProvider";
+import { BrandButton } from "../../../components/rise/BrandButton";
+import { Card } from "../../../components/rise/Card";
+import { Footer } from "../../../components/rise/Footer";
+import { ProgressSegments } from "../../../components/rise/ProgressSegments";
+import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
+import { SessionTimeline } from "../../../components/rise/SessionTimeline";
+import { TopNav } from "../../../components/rise/TopNav";
+import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
+import { getStudent, listReports, listSessions } from "../../../lib/supabaseData";
+import { initialsFromName } from "../../../lib/tutorKey";
+import type { ChildProfile, ReportRow, SessionLog } from "../../../types/rise";
+
+export default function StudentOverviewPage() {
+  const params = useParams<{ studentId: string }>();
+  const [student, setStudent] = useState<ChildProfile | null>(null);
+  const [sessions, setSessions] = useState<SessionLog[]>([]);
+  const [reports, setReports] = useState<ReportRow[]>([]);
+  const [status, setStatus] = useState("Loading student...");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [child, sessionData, reportData] = await Promise.all([
+          getStudent(params.studentId),
+          listSessions(params.studentId),
+          listReports(params.studentId),
+        ]);
+        setStudent(child);
+        setSessions(sessionData);
+        setReports(reportData);
+        setStatus("");
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Could not load student.");
+      }
+    }
+
+    load();
+  }, [params.studentId]);
+
+  const latestSession = sessions[0];
+  const progressValue = latestSession?.progressRating ?? (student?.confidenceLevel as 1 | 2 | 3 | 4 | 5 | undefined) ?? 3;
+
+  if (!student) {
+    return (
+      <ProtectedContent>
+        <main className="min-h-screen bg-[#fcf8ff]">
+          <TopNav />
+          <div className="mx-auto max-w-7xl px-6 py-10">
+            <p className="rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p>
+          </div>
+          <Footer />
+        </main>
+      </ProtectedContent>
+    );
+  }
+
+  return (
+    <ProtectedContent>
+      <main className="min-h-screen bg-[#fcf8ff]">
+        <TopNav />
+        <div className="mx-auto max-w-7xl px-6 py-10">
+          <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-widest text-[#4648d4]">Student overview</p>
+              <h1 className="mt-2 text-3xl font-semibold text-[#1b1b23]">{student.fullName}</h1>
+              <p className="mt-2 text-lg text-[#464554]">
+                {student.educationStage || "Education stage not set"} · {student.yearGroup}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href={`/sessions/new/${student.id}`}>
+                <BrandButton>
+                  <FilePlus2 className="h-4 w-4" />
+                  Log New Session
+                </BrandButton>
+              </Link>
+              <Link href={`/students/new?childId=${student.id}`}>
+                <BrandButton variant="secondary">
+                  <Pencil className="h-4 w-4" />
+                  Edit Profile
+                </BrandButton>
+              </Link>
+              <Link href="/students">
+                <BrandButton variant="secondary">
+                  <UserRound className="h-4 w-4" />
+                  Back to Students
+                </BrandButton>
+              </Link>
+            </div>
+          </header>
+
+          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+
+          <section className="mb-8 grid gap-6 lg:grid-cols-12">
+            <Card className="flex flex-col gap-5 lg:col-span-8">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e1e0ff] text-2xl font-black text-[#4648d4]">
+                    {initialsFromName(student.fullName)}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-2xl font-semibold text-[#1b1b23]">{student.fullName}</h2>
+                      <span className="rounded-full bg-[#e1e0ff] px-3 py-1 text-xs font-bold text-[#4648d4]">{student.status || "active"}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-[#464554]">
+                      {student.subjects.join(" / ") || "No subjects set"} · {student.school || "School not set"}
+                    </p>
+                  </div>
+                </div>
+                <div className="w-full max-w-sm">
+                  <TutorKeyBadge
+                    tutorKey={student.tutorKey}
+                    onCopy={() => setStatus("Tutor key copied")}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Current level / grade</p>
+                  <p className="mt-2 text-lg font-semibold text-[#1b1b23]">{student.currentWorkingLevel}</p>
+                </div>
+                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Target level / grade</p>
+                  <p className="mt-2 text-lg font-semibold text-[#1b1b23]">{student.targetLevel}</p>
+                </div>
+                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Tutor key</p>
+                  <p className="mt-2 font-mono text-lg font-black tracking-widest text-[#4648d4]">{student.tutorKey}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Goals</p>
+                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.mainGoals || "No goals added yet."}</p>
+                </div>
+                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Learning style</p>
+                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.learningStyle || "Not set"}</p>
+                </div>
+                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Strengths</p>
+                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.strengths?.length ? student.strengths.join(", ") : "Not set"}</p>
+                </div>
+                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
+                  <p className="text-xs font-bold uppercase text-[#767586]">Struggles</p>
+                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.struggles?.length ? student.struggles.join(", ") : "Not set"}</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="space-y-4 lg:col-span-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Progress</p>
+                <div className="mt-3">
+                  <ProgressSegments value={progressValue} />
+                </div>
+                <p className="mt-3 text-sm text-[#464554]">
+                  Latest session: {latestSession ? `${latestSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(latestSession.sessionDate))}` : "No sessions logged yet."}
+                </p>
+              </div>
+              <div className="border-t border-[#e9e6f3] pt-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Parent contact</p>
+                <p className="mt-2 text-sm font-semibold text-[#1b1b23]">{student.parentName}</p>
+                <p className="text-sm text-[#464554]">{student.parentEmail || "No parent email set"}</p>
+                <p className="mt-2 text-sm text-[#464554]">{student.parentRelationship || "Parent / guardian"}</p>
+              </div>
+              <div className="border-t border-[#e9e6f3] pt-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Current plan</p>
+                <p className="mt-2 text-sm leading-6 text-[#464554]">{student.currentHomework || "No homework set."}</p>
+                <p className="mt-2 text-sm leading-6 text-[#464554]">{student.nextSessionFocus || "No next focus added yet."}</p>
+              </div>
+            </Card>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <div className="mb-4 flex items-center gap-3">
+                <CalendarDays className="h-5 w-5 text-[#4648d4]" />
+                <h2 className="text-xl font-semibold text-[#1b1b23]">Recent sessions</h2>
+              </div>
+              {sessions.length ? <SessionTimeline sessions={sessions} /> : <p className="text-sm text-[#464554]">No sessions logged yet.</p>}
+            </Card>
+
+            <Card>
+              <div className="mb-4 flex items-center gap-3">
+                <BookOpen className="h-5 w-5 text-[#4648d4]" />
+                <h2 className="text-xl font-semibold text-[#1b1b23]">Recent reports</h2>
+              </div>
+              <div className="space-y-3">
+                {reports.length ? (
+                  reports.slice(0, 3).map((report) => (
+                    <div key={report.id} className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
+                      <p className="text-sm font-semibold text-[#1b1b23]">{report.title}</p>
+                      <p className="mt-1 text-sm text-[#464554]">{report.sent_status || "draft"}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link href={`/reports/${report.id}`}>
+                          <BrandButton variant="secondary">View</BrandButton>
+                        </Link>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-[#464554]">No reports generated yet.</p>
+                )}
+              </div>
+            </Card>
+          </section>
+        </div>
+        <Footer />
+      </main>
+    </ProtectedContent>
+  );
+}

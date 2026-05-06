@@ -19,6 +19,10 @@ function cleanArray(values: string[] | undefined | null) {
   return (values ?? []).map((item) => item.trim()).filter(Boolean);
 }
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
 function isTutorKeyConflict(error: { code?: string; message?: string; details?: string } | null) {
   if (!error) return false;
   const text = `${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
@@ -140,23 +144,23 @@ export function sessionRowToSessionLog(row: SessionRow): SessionLog {
     subject: row.subject ?? undefined,
     topic: row.topic || "Session focus",
     quickNotes: row.summary || "",
-    sessionFocus: row.subject ? [row.subject] : [],
-    understandingToday: struggles.length ? "guided" : "mostly-independent",
-    effortEngagement: 4,
-    keySkillWorkedOn: strengths[0] || "Understanding concepts",
+    sessionFocus: row.session_focus ?? (row.subject ? [row.subject] : []),
+    understandingToday: (row.understanding_level as SessionLog["understandingToday"]) || (struggles.length ? "guided" : "mostly-independent"),
+    effortEngagement: (row.effort_rating as SessionLog["effortEngagement"]) || 4,
+    keySkillWorkedOn: row.key_skill || strengths[0] || "Understanding concepts",
     homeworkStatus: row.homework ? "set-today" : "not-set",
     homeworkDetails: row.homework ?? undefined,
     nextLessonFocus: row.next_steps ? [row.next_steps] : [],
     specificNextFocus: row.next_steps ?? undefined,
-    progressRating: struggles.length ? 3 : 4,
-    confidenceRating: 3,
-    reportTone: "balanced",
+    progressRating: (row.effort_rating ? Math.min(5, Math.max(1, row.effort_rating)) : struggles.length ? 3 : 4) as SessionLog["progressRating"],
+    confidenceRating: (row.confidence_rating ? Math.min(5, Math.max(1, row.confidence_rating)) : 3) as SessionLog["confidenceRating"],
+    reportTone: (row.report_tone as SessionLog["reportTone"]) || "balanced",
     includeInReport: {
       progressRating: true,
       confidenceRating: true,
-      homework: true,
-      nextSteps: true,
-      previousSessionComparison: true,
+      homework: row.include_in_report ? row.include_in_report.includes("homework") : true,
+      nextSteps: row.include_in_report ? row.include_in_report.includes("nextSteps") : true,
+      previousSessionComparison: row.include_in_report ? row.include_in_report.includes("previousSessionComparison") : true,
     },
     createdAt: row.created_at || new Date().toISOString(),
   };
@@ -282,12 +286,14 @@ export async function listSessions(studentId?: string) {
 
 export async function insertSession(session: SessionLog, child: ChildProfile) {
   const client = requireSupabase();
-  const tutorId = await getCurrentUserId();
+  const tutorId = child.tutorId || (await getCurrentUserId());
+  const sessionId = isUuid(session.id) ? session.id : crypto.randomUUID();
+  const sessionDate = cleanText(session.sessionDate) || new Date().toISOString().slice(0, 10);
   const row = {
-    id: session.id,
+    id: sessionId,
     student_id: child.id,
     tutor_id: tutorId,
-    session_date: session.sessionDate,
+    session_date: sessionDate,
     subject: session.subject || child.subjects[0] || null,
     topic: session.topic,
     summary: session.quickNotes,
@@ -319,9 +325,10 @@ function reportBody(report: ParentReport) {
 
 export async function insertReport(report: ParentReport, session: SessionLog, child: ChildProfile) {
   const client = requireSupabase();
-  const tutorId = await getCurrentUserId();
+  const tutorId = session.tutorId || child.tutorId || (await getCurrentUserId());
+  const reportId = isUuid(report.id) ? report.id : crypto.randomUUID();
   const row = {
-    id: report.id,
+    id: reportId,
     student_id: child.id,
     tutor_id: tutorId,
     session_id: session.id,
@@ -336,16 +343,20 @@ export async function insertReport(report: ParentReport, session: SessionLog, ch
   return data as ReportRow;
 }
 
-export async function listReports() {
+export async function listReports(studentId?: string) {
   const client = requireSupabase();
   const tutorId = await getCurrentUserId();
-  const { data, error } = await client
+  let query = client
     .from("reports")
-    .select("*, students(full_name, parent_email), sessions(subject, topic, session_date)")
+    .select("*, students(full_name, parent_email, tutor_key), sessions(subject, topic, session_date)")
     .eq("tutor_id", tutorId)
     .order("created_at", { ascending: false });
+  if (studentId) {
+    query = query.eq("student_id", studentId);
+  }
+  const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as Array<ReportRow & { students?: { full_name?: string; parent_email?: string }; sessions?: { subject?: string; topic?: string; session_date?: string } }>;
+  return (data ?? []) as Array<ReportRow & { students?: { full_name?: string; parent_email?: string; tutor_key?: string }; sessions?: { subject?: string; topic?: string; session_date?: string } }>;
 }
 
 export async function getReportBundle(reportId: string) {

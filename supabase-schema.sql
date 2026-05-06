@@ -88,8 +88,23 @@ create table if not exists sessions (
   struggles text[] default '{}',
   homework text,
   next_steps text,
+  understanding_level text,
+  effort_rating int,
+  confidence_rating int,
+  session_focus text[] default '{}',
+  key_skill text,
+  report_tone text,
+  include_in_report text[] default '{}',
   created_at timestamp with time zone default now()
 );
+
+alter table sessions add column if not exists understanding_level text;
+alter table sessions add column if not exists effort_rating int;
+alter table sessions add column if not exists confidence_rating int;
+alter table sessions add column if not exists session_focus text[] default '{}';
+alter table sessions add column if not exists key_skill text;
+alter table sessions add column if not exists report_tone text;
+alter table sessions add column if not exists include_in_report text[] default '{}';
 
 create table if not exists reports (
   id uuid primary key default gen_random_uuid(),

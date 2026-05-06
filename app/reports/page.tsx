@@ -77,9 +77,14 @@ export default function ReportsPage() {
                 <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
                   <p className="font-semibold text-[#1b1b23]">{student.fullName}</p>
                   <p className="mt-1 text-sm text-[#464554]">{student.subjects.join(", ")} / {student.parentEmail}</p>
-                  <Link href={`/sessions/new/${student.id}`} className="mt-3 inline-block">
-                    <BrandButton variant="secondary">Log Session</BrandButton>
-                  </Link>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link href={`/students/${student.id}`}>
+                      <BrandButton variant="secondary">View Profile</BrandButton>
+                    </Link>
+                    <Link href={`/sessions/new/${student.id}`}>
+                      <BrandButton variant="secondary">Log Session</BrandButton>
+                    </Link>
+                  </div>
                 </div>
               ) : null}
             </Card>

@@ -23,8 +23,10 @@ const skillOptions = ["Recall", "Understanding concepts", "Applying formulas", "
 export default function NewSessionPage() {
   const params = useParams<{ childId: string }>();
   const router = useRouter();
+  const isDev = process.env.NODE_ENV !== "production";
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [previousSessions, setPreviousSessions] = useState<SessionLog[]>([]);
+  const [sessionId] = useState(() => crypto.randomUUID());
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().slice(0, 10));
   const [topic, setTopic] = useState("Electromagnetic Induction");
   const [quickNotes, setQuickNotes] = useState("We linked field changes to induced current. Ayaan was guided at first, then became more independent after visual examples. Still needs support explaining current direction. Set exam-style questions 1-8 and start next time with a recap before transformers.");
@@ -69,7 +71,7 @@ export default function NewSessionPage() {
   const session = useMemo<SessionLog | null>(() => {
     if (!child) return null;
     return {
-      id: `session-${child.id}-${Date.now()}`,
+      id: sessionId,
       childId: child.id,
       tutorId: child.tutorId || "",
       sessionDate,
@@ -92,6 +94,7 @@ export default function NewSessionPage() {
     };
   }, [
     child,
+    sessionId,
     sessionDate,
     topic,
     quickNotes,
@@ -114,9 +117,9 @@ export default function NewSessionPage() {
     try {
       await insertSession(session, child!);
       setPreviousSessions(await listSessions(child!.id));
-      setStatus("Session saved to Supabase");
+      setStatus("Session saved successfully.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not save session.");
+      setStatus(isDev && error instanceof Error ? error.message : "Could not save session.");
     }
   }
 
@@ -126,9 +129,10 @@ export default function NewSessionPage() {
       const savedSession = await insertSession(session, child);
       const report = generateParentReport(child, savedSession, previousSessions);
       await insertReport(report, savedSession, child);
+      setStatus("Parent report generated.");
       router.push(`/reports/${report.id}`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not generate report.");
+      setStatus(isDev && error instanceof Error ? error.message : "Could not generate report.");
     }
   }
 

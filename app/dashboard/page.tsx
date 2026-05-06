@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, BarChart3, CalendarClock, FileText, KeyRound, PersonStanding, Search, UsersRound } from "lucide-react";
+import { AlertCircle, CalendarClock, FileText, KeyRound, PersonStanding, Search, UsersRound } from "lucide-react";
 import { BrandButton } from "../../components/rise/BrandButton";
 import { Card } from "../../components/rise/Card";
 import { Footer } from "../../components/rise/Footer";
@@ -53,7 +53,11 @@ export default function DashboardPage() {
   const sessionsThisWeek = sessions.filter((session) => new Date(session.sessionDate) >= weekStart);
   const sentReports = reports.filter((report) => report.sent_status === "sent");
   const studentsNeedingAttention = students.filter((student) => student.struggles?.length || sessions.filter((session) => session.childId === student.id).length === 0);
-  const nextSession = sessions.find((session) => new Date(session.sessionDate) >= new Date());
+  const upcomingSessions = sessions
+    .filter((session) => new Date(session.sessionDate) >= new Date())
+    .slice(0, 3);
+  const recentSessions = sessions.slice(0, 3);
+  const recentReports = reports.slice(0, 3);
 
   return (
     <ProtectedContent>
@@ -85,16 +89,15 @@ export default function DashboardPage() {
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-[#1b1b23]">Dashboard Insights</h2>
-                <p className="mt-1 text-sm text-[#464554]">A quick pulse check across saved students and reports.</p>
+                <p className="mt-1 text-sm text-[#464554]">A quick pulse check across saved students, sessions and reports.</p>
               </div>
-              <BarChart3 className="h-6 w-6 text-[#4648d4]" />
             </div>
             <div className="grid gap-4 md:grid-cols-5">
               {[
                 { label: "Active students", value: students.filter((student) => student.status !== "archived").length, icon: UsersRound },
                 { label: "Sessions this week", value: sessionsThisWeek.length, icon: CalendarClock },
                 { label: "Reports sent", value: sentReports.length, icon: FileText },
-                { label: "Next session", value: nextSession ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(nextSession.sessionDate)) : "None", icon: CalendarClock },
+                { label: "Next session", value: upcomingSessions[0] ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(upcomingSessions[0].sessionDate)) : "None", icon: CalendarClock },
                 { label: "Need attention", value: studentsNeedingAttention.length, icon: AlertCircle },
               ].map((item) => (
                 <div key={item.label} className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
@@ -104,10 +107,40 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 grid h-20 grid-cols-7 items-end gap-2 rounded-xl bg-[#fcf8ff] p-4">
-              {[1, 3, 2, 5, 4, 6, Math.max(1, sessionsThisWeek.length)].map((height, index) => (
-                <div key={index} className="rounded-t-lg bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]" style={{ height: `${height * 10}px` }} />
-              ))}
+            <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
+                <h3 className="text-sm font-bold uppercase text-[#767586]">Today / Upcoming</h3>
+                <div className="mt-3 space-y-3">
+                  {upcomingSessions.length ? upcomingSessions.map((session) => (
+                    <div key={session.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                      <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
+                      <p className="text-sm text-[#464554]">{new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(session.sessionDate))}</p>
+                    </div>
+                  )) : <p className="text-sm text-[#464554]">No upcoming sessions yet.</p>}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
+                <h3 className="text-sm font-bold uppercase text-[#767586]">Recent sessions</h3>
+                <div className="mt-3 space-y-3">
+                  {recentSessions.length ? recentSessions.map((session) => (
+                    <div key={session.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                      <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
+                      <p className="text-sm text-[#464554]">{session.quickNotes}</p>
+                    </div>
+                  )) : <p className="text-sm text-[#464554]">No sessions logged yet.</p>}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
+                <h3 className="text-sm font-bold uppercase text-[#767586]">Recent reports</h3>
+                <div className="mt-3 space-y-3">
+                  {recentReports.length ? recentReports.map((report) => (
+                    <div key={report.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                      <p className="text-sm font-semibold text-[#1b1b23]">{report.title}</p>
+                      <p className="text-sm text-[#464554]">{report.sent_status || "draft"}</p>
+                    </div>
+                  )) : <p className="text-sm text-[#464554]">No reports generated yet.</p>}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -130,6 +163,7 @@ export default function DashboardPage() {
                   key={child.id}
                   child={child}
                   lastSession={sessions.find((session) => session.childId === child.id)}
+                  onView={() => router.push(`/students/${child.id}`)}
                   onEdit={() => router.push(`/students/new?childId=${child.id}`)}
                   onRemove={async () => {
                     if (!confirm(`Remove ${child.fullName}?`)) return;

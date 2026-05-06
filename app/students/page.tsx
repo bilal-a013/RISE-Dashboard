@@ -74,7 +74,7 @@ function StudentsPageContent() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Link href={`/reports?studentId=${student.id}`}>
+                      <Link href={`/students/${student.id}`}>
                         <BrandButton variant="secondary">
                           <Eye className="h-4 w-4" />
                           View Profile

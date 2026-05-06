@@ -171,6 +171,13 @@ export type SessionRow = {
   struggles: string[] | null;
   homework: string | null;
   next_steps: string | null;
+  understanding_level?: string | null;
+  effort_rating?: number | null;
+  confidence_rating?: number | null;
+  session_focus?: string[] | null;
+  key_skill?: string | null;
+  report_tone?: string | null;
+  include_in_report?: string[] | null;
   created_at: string | null;
 };
 

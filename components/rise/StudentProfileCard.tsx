@@ -8,27 +8,29 @@ import { Card } from "./Card";
 export function StudentProfileCard({
   child,
   lastSession,
+  onView,
   onEdit,
   onRemove,
 }: {
   child: ChildProfile;
   lastSession?: SessionLog;
+  onView: () => void;
   onEdit: () => void;
   onRemove: () => void;
 }) {
   return (
     <Card
       className="flex h-full cursor-pointer flex-col gap-5 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-md"
-      onClick={onEdit}
+      onClick={onView}
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onEdit();
+          onView();
         }
       }}
-      aria-label={`Edit profile for ${child.fullName}`}
+      aria-label={`Open profile for ${child.fullName}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -71,6 +73,9 @@ export function StudentProfileCard({
       </div>
 
       <div className="mt-auto flex gap-2">
+        <BrandButton variant="secondary" className="flex-1" onClick={(event) => { event.stopPropagation(); onView(); }}>
+          View Profile
+        </BrandButton>
         <Link href={`/sessions/new/${child.id}`} className="flex-1" onClick={(event) => event.stopPropagation()}>
           <BrandButton variant="secondary" className="w-full">
             Log New Session
