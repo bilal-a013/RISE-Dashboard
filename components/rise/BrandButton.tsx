@@ -10,10 +10,10 @@ export function BrandButton({ variant = "primary", className, children, ...props
   return (
     <button
       className={cn(
-        "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e1e0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-        variant === "primary" && "bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] text-white shadow-lg shadow-[#4648d4]/20 hover:-translate-y-0.5 hover:opacity-95",
-        variant === "secondary" && "border border-[#c7c4d7] bg-white text-[#464554] hover:-translate-y-0.5 hover:bg-[#f5f2fe]",
-        variant === "dark" && "bg-[#1b1b23] text-white hover:-translate-y-0.5 hover:bg-[#303038]",
+        "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(85,70,232,0.22)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--rise-bg)]",
+        variant === "primary" && "rise-button-primary hover:-translate-y-0.5 hover:opacity-95",
+        variant === "secondary" && "rise-button-secondary hover:-translate-y-0.5 hover:bg-[var(--rise-surface-soft)]",
+        variant === "dark" && "bg-[var(--rise-text)] text-[var(--rise-bg)] hover:-translate-y-0.5 hover:opacity-95",
         className
       )}
       {...props}

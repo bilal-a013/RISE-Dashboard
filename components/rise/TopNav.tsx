@@ -21,10 +21,10 @@ export function TopNav() {
   const displayName = user?.user_metadata?.full_name || user?.email || "RISE Tutor";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#c7c4d7] bg-white/95 shadow-sm backdrop-blur transition-colors print:hidden dark:border-slate-700 dark:bg-slate-950/90">
+    <header className="rise-nav sticky top-0 z-40 backdrop-blur transition-colors print:hidden">
       <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
         <div className="flex items-center gap-10">
-          <Link href="/dashboard" className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] bg-clip-text text-2xl font-extrabold text-transparent">
+          <Link href="/dashboard" className="bg-[linear-gradient(135deg,var(--rise-purple)_0%,var(--rise-purple-2)_100%)] bg-clip-text text-2xl font-extrabold text-transparent">
             RISE Tutoring
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
@@ -36,7 +36,7 @@ export function TopNav() {
                   href={item.href}
                   className={cn(
                     "pb-1 text-sm font-semibold transition",
-                    active ? "border-b-2 border-[#4648d4] text-[#4648d4] dark:border-[#c0c1ff] dark:text-[#c0c1ff]" : "text-[#464554] hover:text-[#4648d4] dark:text-slate-300 dark:hover:text-[#c0c1ff]"
+                    active ? "border-b-2 border-[var(--rise-purple)] text-[var(--rise-purple)] dark:border-[var(--rise-purple)] dark:text-[var(--rise-purple)]" : "text-[var(--rise-text-muted)] hover:text-[var(--rise-purple)] dark:text-[var(--rise-text-muted)] dark:hover:text-[var(--rise-purple)]"
                   )}
                 >
                   {item.label}
@@ -47,7 +47,7 @@ export function TopNav() {
               href="/settings/integrations"
               className={cn(
                 "flex items-center gap-1 pb-1 text-sm font-semibold transition",
-                pathname.startsWith("/settings") ? "border-b-2 border-[#4648d4] text-[#4648d4] dark:border-[#c0c1ff] dark:text-[#c0c1ff]" : "text-[#464554] hover:text-[#4648d4] dark:text-slate-300 dark:hover:text-[#c0c1ff]"
+                pathname.startsWith("/settings") ? "border-b-2 border-[var(--rise-purple)] text-[var(--rise-purple)] dark:border-[var(--rise-purple)] dark:text-[var(--rise-purple)]" : "text-[var(--rise-text-muted)] hover:text-[var(--rise-purple)] dark:text-[var(--rise-text-muted)] dark:hover:text-[var(--rise-purple)]"
               )}
             >
               <Settings2 className="h-4 w-4" />
@@ -56,21 +56,21 @@ export function TopNav() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <button type="button" className="rounded-full p-2 text-[#464554] transition hover:bg-[#f5f2fe] dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Notifications">
+          <button type="button" className="rounded-full p-2 text-[var(--rise-text-muted)] transition hover:bg-[var(--rise-surface-soft)] dark:hover:bg-slate-800" aria-label="Notifications">
             <Bell className="h-5 w-5" />
           </button>
           <button
             type="button"
             onClick={toggleTheme}
-            className="rounded-full p-2 text-[#464554] transition hover:bg-[#f5f2fe] dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-full p-2 text-[var(--rise-text-muted)] transition hover:bg-[var(--rise-surface-soft)] dark:hover:bg-slate-800"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? <SunMedium className="h-5 w-5" /> : <MoonStar className="h-5 w-5" />}
           </button>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#c7c4d7] bg-[#efecf8] text-sm font-bold text-[#4648d4] dark:border-slate-700 dark:bg-slate-800 dark:text-[#c0c1ff]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] text-sm font-bold text-[var(--rise-purple)] dark:bg-slate-800 dark:text-[var(--rise-purple)]">
             {initialsFromName(displayName)}
           </div>
-          <button type="button" onClick={signOut} className="rounded-full p-2 text-[#464554] transition hover:bg-[#f5f2fe] dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Log out">
+          <button type="button" onClick={signOut} className="rounded-full p-2 text-[var(--rise-text-muted)] transition hover:bg-[var(--rise-surface-soft)] dark:hover:bg-slate-800" aria-label="Log out">
             <LogOut className="h-5 w-5" />
           </button>
         </div>

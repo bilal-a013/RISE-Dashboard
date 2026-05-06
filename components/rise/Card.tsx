@@ -9,7 +9,7 @@ type CardProps = HTMLAttributes<HTMLElement> & {
 
 export function Card({ children, className, padded = true, ...props }: CardProps) {
   return (
-    <section className={cn("rounded-2xl border border-[#c7c4d7] bg-white shadow-sm transition duration-200 hover:-translate-y-0.5", padded && "p-6", className)} {...props}>
+    <section className={cn("rise-panel rounded-2xl transition duration-200 hover:-translate-y-0.5", padded && "p-6", className)} {...props}>
       {children}
     </section>
   );

@@ -10,9 +10,51 @@ html.dark {
   color-scheme: dark;
 }
 
+:root {
+  --rise-bg: #fbf7ff;
+  --rise-surface: #ffffff;
+  --rise-surface-soft: #f4efff;
+  --rise-border: #d8d0ea;
+  --rise-border-strong: #c7bde1;
+  --rise-text: #1d1d27;
+  --rise-text-muted: #5f6070;
+  --rise-text-soft: #8a8b9a;
+  --rise-purple: #5546e8;
+  --rise-purple-2: #8a22d8;
+  --rise-purple-soft: #eee9ff;
+  --rise-shadow: 0 14px 35px rgba(62, 45, 125, 0.08);
+  --rise-field: #ffffff;
+  --rise-field-text: #1d1d27;
+  --rise-field-border: #d8d0ea;
+  --rise-chip: #f4efff;
+  --rise-chip-text: #5f6070;
+  --rise-nav: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="dark"] {
+  --rise-bg: #0b1020;
+  --rise-surface: #111827;
+  --rise-surface-soft: #151f32;
+  --rise-border: #2b3650;
+  --rise-border-strong: #3a4663;
+  --rise-text: #f5f7fb;
+  --rise-text-muted: #c2c8d6;
+  --rise-text-soft: #8f9aad;
+  --rise-purple: #8b7cf6;
+  --rise-purple-2: #b45cff;
+  --rise-purple-soft: rgba(139, 124, 246, 0.16);
+  --rise-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+  --rise-field: #111827;
+  --rise-field-text: #f5f7fb;
+  --rise-field-border: #2b3650;
+  --rise-chip: #151f32;
+  --rise-chip-text: #c2c8d6;
+  --rise-nav: rgba(15, 23, 42, 0.95);
+}
+
 body {
-  background: #fcf8ff;
-  color: #1b1b23;
+  background: var(--rise-bg);
+  color: var(--rise-text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   @apply antialiased;
 }
@@ -53,6 +95,89 @@ body {
   animation: rise-page-in 180ms ease-out;
 }
 
+.rise-page {
+  background: var(--rise-bg);
+  color: var(--rise-text);
+}
+
+.rise-surface {
+  background: var(--rise-surface);
+  color: var(--rise-text);
+  border: 1px solid var(--rise-border);
+  box-shadow: var(--rise-shadow);
+}
+
+.rise-soft-surface {
+  background: var(--rise-surface-soft);
+  color: var(--rise-text);
+  border: 1px solid var(--rise-border);
+}
+
+.rise-muted {
+  color: var(--rise-text-muted);
+}
+
+.rise-text-soft {
+  color: var(--rise-text-soft);
+}
+
+.rise-border {
+  border-color: var(--rise-border);
+}
+
+.rise-border-strong {
+  border-color: var(--rise-border-strong);
+}
+
+.rise-input {
+  background: var(--rise-field);
+  color: var(--rise-field-text);
+  border: 1px solid var(--rise-field-border);
+  border-radius: 1rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.rise-input::placeholder {
+  color: var(--rise-text-soft);
+}
+
+.rise-input:focus,
+.rise-input:focus-visible {
+  outline: none;
+  border-color: var(--rise-purple);
+  box-shadow: 0 0 0 4px rgba(85, 70, 232, 0.16);
+}
+
+.rise-button-primary {
+  background: linear-gradient(135deg, var(--rise-purple) 0%, var(--rise-purple-2) 100%);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(85, 70, 232, 0.18);
+}
+
+.rise-button-secondary {
+  background: var(--rise-surface);
+  color: var(--rise-text-muted);
+  border: 1px solid var(--rise-border);
+}
+
+.rise-chip {
+  background: var(--rise-chip);
+  color: var(--rise-chip-text);
+  border: 1px solid var(--rise-border);
+}
+
+.rise-panel {
+  background: var(--rise-surface);
+  color: var(--rise-text);
+  border: 1px solid var(--rise-border);
+  box-shadow: var(--rise-shadow);
+}
+
+.rise-nav {
+  background: var(--rise-nav);
+  border-bottom: 1px solid var(--rise-border);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -67,68 +192,54 @@ body {
   }
 }
 
-.dark body {
-  background: #0b1020;
-  color: #e2e8f0;
+.dark .rise-nav,
+.dark .rise-panel,
+.dark .rise-surface,
+.dark .rise-soft-surface {
+  box-shadow: var(--rise-shadow);
 }
 
-.dark .bg-white,
-.dark [class*="bg-[#fcf8ff]"],
+.dark [class*="bg-[#fcf8ff]"] {
+  background-color: var(--rise-bg) !important;
+}
+
 .dark [class*="bg-[#f5f2fe]"],
-.dark [class*="bg-[#efecf8]"],
-.dark [class*="bg-[#f8fafc]"] {
-  background-color: #111827 !important;
+.dark [class*="bg-[#efecf8]"] {
+  background-color: var(--rise-surface-soft) !important;
 }
 
-.dark [class*="bg-[#e1e0ff]"] {
-  background-color: #3730a3 !important;
+.dark [class*="bg-white"] {
+  background-color: var(--rise-surface) !important;
 }
 
-.dark [class*="bg-[#6063ee]"],
-.dark [class*="bg-[#4648d4]"],
-.dark [class*="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]"] {
-  filter: saturate(1.05) brightness(1.05);
-}
-
-.dark .border,
 .dark [class*="border-[#c7c4d7]"],
 .dark [class*="border-[#e9e6f3]"] {
-  border-color: #334155 !important;
+  border-color: var(--rise-border) !important;
 }
 
 .dark [class*="text-[#1b1b23]"] {
-  color: #f8fafc !important;
+  color: var(--rise-text) !important;
 }
 
 .dark [class*="text-[#464554]"] {
-  color: #cbd5e1 !important;
+  color: var(--rise-text-muted) !important;
 }
 
 .dark [class*="text-[#767586]"] {
-  color: #94a3b8 !important;
+  color: var(--rise-text-soft) !important;
 }
 
 .dark input,
 .dark textarea,
 .dark select {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+  background: var(--rise-field) !important;
+  color: var(--rise-field-text) !important;
+  border-color: var(--rise-field-border) !important;
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: #64748b !important;
-}
-
-.dark a {
-  color: inherit;
-}
-
-.dark .shadow-sm,
-.dark .shadow-lg,
-.dark .shadow-xl {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
+  color: var(--rise-text-soft) !important;
 }
 
 @media print {

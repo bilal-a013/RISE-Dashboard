@@ -30,10 +30,10 @@ export const confidenceOptions: RatingSelectorProps["options"] = [
 
 export function RatingSelector({ label, value, onChange, options }: RatingSelectorProps) {
   return (
-    <div className="rounded-2xl border border-[#c7c4d7] bg-white p-5 shadow-sm">
+    <div className="rise-panel rounded-2xl p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-[#1b1b23]">{label}</h3>
-        <span className="text-sm font-bold text-[#4648d4]">{value}/5</span>
+        <h3 className="text-sm font-semibold text-[var(--rise-text)]">{label}</h3>
+        <span className="text-sm font-bold text-[var(--rise-purple)]">{value}/5</span>
       </div>
       <div className="grid grid-cols-5 gap-2">
         {options.map((option) => (
@@ -42,8 +42,8 @@ export function RatingSelector({ label, value, onChange, options }: RatingSelect
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "min-h-14 rounded-xl px-2 text-center text-xs font-bold transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e1e0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-              option.value === value ? "bg-[#4648d4] text-white shadow-sm ring-1 ring-[#4648d4]/10" : "bg-[#efecf8] text-[#464554] hover:border-[#4648d4] hover:bg-white"
+              "min-h-14 rounded-xl px-2 text-center text-xs font-bold transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(85,70,232,0.18)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--rise-surface)]",
+              option.value === value ? "bg-[var(--rise-purple)] text-white shadow-sm ring-1 ring-[var(--rise-purple)]/10" : "bg-[var(--rise-chip)] text-[var(--rise-chip-text)] hover:bg-[var(--rise-surface)] hover:text-[var(--rise-text)]"
             )}
           >
             {option.emoji ? <span className="block text-base leading-5">{option.emoji}</span> : null}
@@ -51,7 +51,7 @@ export function RatingSelector({ label, value, onChange, options }: RatingSelect
           </button>
         ))}
       </div>
-      <p className="mt-3 text-xs text-[#464554]">{options.find((option) => option.value === value)?.label}</p>
+      <p className="mt-3 text-xs text-[var(--rise-text-muted)]">{options.find((option) => option.value === value)?.label}</p>
     </div>
   );
 }

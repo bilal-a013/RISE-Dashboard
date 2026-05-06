@@ -21,10 +21,10 @@ export function ChipSelector({
           type="button"
           onClick={() => toggle(option)}
           className={cn(
-            "rounded-full border px-3 py-2 text-xs font-semibold transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e1e0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+            "rounded-full border px-3 py-2 text-xs font-semibold transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(85,70,232,0.18)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--rise-bg)]",
             value.includes(option)
-              ? "border-transparent bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] text-white shadow-sm"
-              : "border-[#c7c4d7] bg-[#f5f2fe] text-[#464554] hover:border-[#4648d4] hover:bg-white"
+              ? "border-transparent bg-[linear-gradient(135deg,var(--rise-purple)_0%,var(--rise-purple-2)_100%)] text-white shadow-sm"
+              : "border-[var(--rise-border)] bg-[var(--rise-chip)] text-[var(--rise-chip-text)] hover:border-[var(--rise-purple)] hover:bg-[var(--rise-surface)] hover:text-[var(--rise-text)]"
           )}
         >
           {option}
