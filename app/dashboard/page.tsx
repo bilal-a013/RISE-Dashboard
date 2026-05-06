@@ -58,6 +58,7 @@ export default function DashboardPage() {
     .slice(0, 3);
   const recentSessions = sessions.slice(0, 3);
   const recentReports = reports.slice(0, 3);
+  const nextSessionStudent = upcomingSessions[0] ? students.find((student) => student.id === upcomingSessions[0].childId) : null;
 
   return (
     <ProtectedContent>
@@ -94,17 +95,26 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-4 md:grid-cols-5">
               {[
-                { label: "Active students", value: students.filter((student) => student.status !== "archived").length, icon: UsersRound },
-                { label: "Sessions this week", value: sessionsThisWeek.length, icon: CalendarClock },
-                { label: "Reports sent", value: sentReports.length, icon: FileText },
-                { label: "Next session", value: upcomingSessions[0] ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(upcomingSessions[0].sessionDate)) : "None", icon: CalendarClock },
-                { label: "Need attention", value: studentsNeedingAttention.length, icon: AlertCircle },
+                { label: "Active students", value: students.filter((student) => student.status !== "archived").length, icon: UsersRound, href: "/students" },
+                { label: "Sessions this week", value: sessionsThisWeek.length, icon: CalendarClock, href: "/sessions" },
+                { label: "Reports sent", value: sentReports.length, icon: FileText, href: "/reports" },
+                {
+                  label: "Next session",
+                  value: upcomingSessions[0] ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(upcomingSessions[0].sessionDate)) : "None",
+                  icon: CalendarClock,
+                  href: nextSessionStudent ? `/students/${nextSessionStudent.id}` : "/students",
+                },
+                { label: "Need attention", value: studentsNeedingAttention.length, icon: AlertCircle, href: "/students?filter=attention" },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
-                  <item.icon className="mb-3 h-5 w-5 text-[#4648d4]" />
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="group rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:bg-white focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e1e0ff]"
+                >
+                  <item.icon className="mb-3 h-5 w-5 text-[#4648d4] transition group-hover:scale-105" />
                   <p className="text-xs font-bold uppercase text-[#767586]">{item.label}</p>
                   <p className="mt-2 text-2xl font-semibold text-[#1b1b23]">{item.value}</p>
-                </div>
+                </Link>
               ))}
             </div>
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -112,10 +122,10 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-bold uppercase text-[#767586]">Today / Upcoming</h3>
                 <div className="mt-3 space-y-3">
                   {upcomingSessions.length ? upcomingSessions.map((session) => (
-                    <div key={session.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                    <Link key={session.id} href={`/students/${session.childId}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
                       <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
                       <p className="text-sm text-[#464554]">{new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(session.sessionDate))}</p>
-                    </div>
+                    </Link>
                   )) : <p className="text-sm text-[#464554]">No upcoming sessions yet.</p>}
                 </div>
               </div>
@@ -123,10 +133,10 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-bold uppercase text-[#767586]">Recent sessions</h3>
                 <div className="mt-3 space-y-3">
                   {recentSessions.length ? recentSessions.map((session) => (
-                    <div key={session.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                    <Link key={session.id} href={`/sessions/new/${session.childId}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
                       <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
                       <p className="text-sm text-[#464554]">{session.quickNotes}</p>
-                    </div>
+                    </Link>
                   )) : <p className="text-sm text-[#464554]">No sessions logged yet.</p>}
                 </div>
               </div>
@@ -134,10 +144,10 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-bold uppercase text-[#767586]">Recent reports</h3>
                 <div className="mt-3 space-y-3">
                   {recentReports.length ? recentReports.map((report) => (
-                    <div key={report.id} className="rounded-xl border border-[#e9e6f3] bg-white p-3">
+                    <Link key={report.id} href={`/reports/${report.id}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
                       <p className="text-sm font-semibold text-[#1b1b23]">{report.title}</p>
                       <p className="text-sm text-[#464554]">{report.sent_status || "draft"}</p>
-                    </div>
+                    </Link>
                   )) : <p className="text-sm text-[#464554]">No reports generated yet.</p>}
                 </div>
               </div>

@@ -167,7 +167,7 @@ export default function NewSessionPage() {
               </div>
             </Card>
 
-            <Card className="space-y-5">
+            <Card className="space-y-5 p-5 md:p-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[#767586]">Session date</span>
@@ -175,7 +175,7 @@ export default function NewSessionPage() {
                     type="date"
                     value={sessionDate}
                     onChange={(event) => setSessionDate(event.target.value)}
-                    className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                    className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 text-sm text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
                   />
                 </label>
                 <label className="space-y-2">
@@ -183,7 +183,7 @@ export default function NewSessionPage() {
                   <input
                     value={topic}
                     onChange={(event) => setTopic(event.target.value)}
-                    className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                    className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 text-sm text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
                   />
                 </label>
               </div>
@@ -192,22 +192,26 @@ export default function NewSessionPage() {
                 <textarea
                   value={quickNotes}
                   onChange={(event) => setQuickNotes(event.target.value)}
-                  rows={5}
+                  rows={6}
                   placeholder="Outline key concepts covered and any specific challenges encountered..."
-                  className="w-full resize-none rounded-2xl border-[#c7c4d7] p-4 leading-6"
+                  className="min-h-48 w-full resize-y rounded-2xl border border-[#c7c4d7] bg-white px-4 py-4 text-sm leading-6 text-[#1b1b23] shadow-sm outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
                 />
               </label>
             </Card>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <Card>
-                <h3 className="mb-3 font-semibold">Session focus</h3>
-                <p className="mb-3 text-xs text-[#464554]">Tap to choose all that apply.</p>
+              <Card className="space-y-4 p-5 md:p-6">
+                <div>
+                  <h3 className="font-semibold">Session focus</h3>
+                  <p className="mt-1 text-xs text-[#464554]">Tap to choose all that apply.</p>
+                </div>
                 <ChipSelector options={sessionFocusOptions} value={sessionFocus} onChange={setSessionFocus} />
               </Card>
-              <Card>
-                <h3 className="mb-3 font-semibold">Understanding today</h3>
-                <p className="mb-3 text-xs text-[#464554]">Pick the closest match for the session.</p>
+              <Card className="space-y-4 p-5 md:p-6">
+                <div>
+                  <h3 className="font-semibold">Understanding today</h3>
+                  <p className="mt-1 text-xs text-[#464554]">Pick the closest match for the session.</p>
+                </div>
                 <SegmentedSelector
                   value={understandingToday}
                   onChange={setUnderstandingToday}
@@ -226,19 +230,24 @@ export default function NewSessionPage() {
                 { value: 4, label: "4" },
                 { value: 5, label: "Excellent" },
               ]} />
-              <Card>
-                <h3 className="mb-3 font-semibold">Key skill worked on</h3>
+              <Card className="space-y-4 p-5 md:p-6">
+                <div>
+                  <h3 className="font-semibold">Key skill worked on</h3>
+                  <p className="mt-1 text-xs text-[#464554]">Choose the main skill you focused on.</p>
+                </div>
                 <select
                   value={keySkillWorkedOn}
                   onChange={(event) => setKeySkillWorkedOn(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 text-sm text-[#1b1b23] outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
                 >
                   {skillOptions.map((skill) => <option key={skill}>{skill}</option>)}
                 </select>
               </Card>
-              <Card>
-                <h3 className="mb-3 font-semibold">Homework status</h3>
-                <p className="mb-3 text-xs text-[#464554]">Only show details when homework was set or reviewed.</p>
+              <Card className="space-y-4 p-5 md:p-6">
+                <div>
+                  <h3 className="font-semibold">Homework status</h3>
+                  <p className="mt-1 text-xs text-[#464554]">Only show details when homework was set or reviewed.</p>
+                </div>
                 <SegmentedSelector
                   value={homeworkStatus}
                   onChange={setHomeworkStatus}
@@ -251,18 +260,25 @@ export default function NewSessionPage() {
                   ]}
                 />
                 {homeworkStatus === "set-today" || homeworkStatus === "reviewed-today" ? (
-                  <input value={homeworkDetails} onChange={(event) => setHomeworkDetails(event.target.value)} placeholder="Homework details..." className="mt-4 h-11 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]" />
+                  <input
+                    value={homeworkDetails}
+                    onChange={(event) => setHomeworkDetails(event.target.value)}
+                    placeholder="Homework details..."
+                    className="mt-2 h-11 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 text-sm text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                  />
                 ) : null}
               </Card>
-              <Card>
-                <h3 className="mb-3 font-semibold">Next lesson focus</h3>
-                <p className="mb-3 text-xs text-[#464554]">Choose the next step and add a short note below.</p>
+              <Card className="space-y-4 p-5 md:p-6">
+                <div>
+                  <h3 className="font-semibold">Next lesson focus</h3>
+                  <p className="mt-1 text-xs text-[#464554]">Choose the next step and add a short note below.</p>
+                </div>
                 <ChipSelector options={nextFocusOptions} value={nextLessonFocus} onChange={setNextLessonFocus} />
                 <input
                   value={specificNextFocus}
                   onChange={(event) => setSpecificNextFocus(event.target.value)}
                   placeholder="Specific next focus..."
-                  className="mt-4 h-11 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-11 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 text-sm text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
                 />
               </Card>
             </div>
@@ -274,7 +290,7 @@ export default function NewSessionPage() {
           </section>
 
           <aside className="space-y-6 lg:col-span-4">
-            <Card className="space-y-5">
+            <Card className="space-y-5 p-5 md:p-6">
               <h2 className="border-b border-[#c7c4d7] pb-3 text-xl font-semibold">Finalize Log</h2>
               <div>
                 <p className="mb-3 text-xs font-bold uppercase text-[#767586]">Report tone</p>

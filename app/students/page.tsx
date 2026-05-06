@@ -18,6 +18,7 @@ function StudentsPageContent() {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [status, setStatus] = useState("Loading students...");
   const saved = searchParams.get("saved") === "1";
+  const filter = searchParams.get("filter");
 
   useEffect(() => {
     async function load() {
@@ -33,6 +34,16 @@ function StudentsPageContent() {
 
     load();
   }, []);
+
+  const visibleStudents =
+    filter === "attention"
+      ? students.filter((student) => {
+          const studentSessions = sessions.filter((session) => session.childId === student.id);
+          if (!studentSessions.length) return true;
+          const latest = studentSessions[0];
+          return latest.understandingToday === "lots-of-help" || latest.progressRating <= 2 || !latest.quickNotes.trim();
+        })
+      : students;
 
   return (
     <ProtectedContent>
@@ -55,9 +66,15 @@ function StudentsPageContent() {
           {saved ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-[#f5f2fe] p-4 text-sm font-semibold text-[#4648d4]">Profile saved successfully.</p> : null}
           {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
 
-          {students.length ? (
+          {filter === "attention" ? (
+            <p className="mb-6 rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4 text-sm font-semibold text-[#4648d4]">
+              Showing students who may need attention.
+            </p>
+          ) : null}
+
+          {visibleStudents.length ? (
             <section className="grid gap-5">
-              {students.map((student) => {
+              {visibleStudents.map((student) => {
                 const lastSession = sessions.find((session) => session.childId === student.id);
                 return (
                   <Card key={student.id} className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -73,23 +90,29 @@ function StudentsPageContent() {
                         Last session: {lastSession ? `${lastSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(lastSession.sessionDate))}` : "No sessions yet"}
                       </p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid w-full gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-[18rem] lg:grid-cols-2">
                       <Link href={`/students/${student.id}`}>
-                        <BrandButton variant="secondary">
+                        <BrandButton variant="secondary" className="w-full">
                           <Eye className="h-4 w-4" />
-                          View Profile
+                          View
                         </BrandButton>
                       </Link>
                       <Link href={`/students/new?childId=${student.id}`}>
-                        <BrandButton variant="secondary">
+                        <BrandButton variant="secondary" className="w-full">
                           <Pencil className="h-4 w-4" />
                           Edit
                         </BrandButton>
                       </Link>
                       <Link href={`/sessions/new/${student.id}`}>
-                        <BrandButton>
+                        <BrandButton className="w-full">
                           <FilePlus2 className="h-4 w-4" />
                           Log Session
+                        </BrandButton>
+                      </Link>
+                      <Link href={`/students/${student.id}`}>
+                        <BrandButton variant="secondary" className="w-full">
+                          <UsersRound className="h-4 w-4" />
+                          Overview
                         </BrandButton>
                       </Link>
                     </div>

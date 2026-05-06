@@ -72,19 +72,19 @@ export function StudentProfileCard({
         <p className="mt-1 line-clamp-3 text-sm italic text-[#464554]">"{lastSession?.quickNotes || "Ready for the first session log."}"</p>
       </div>
 
-      <div className="mt-auto flex gap-2">
-        <BrandButton variant="secondary" className="flex-1" onClick={(event) => { event.stopPropagation(); onView(); }}>
-          View Profile
+      <div className="mt-auto grid grid-cols-2 gap-2 md:grid-cols-4">
+        <BrandButton variant="secondary" className="w-full" onClick={(event) => { event.stopPropagation(); onView(); }}>
+          View
         </BrandButton>
-        <Link href={`/sessions/new/${child.id}`} className="flex-1" onClick={(event) => event.stopPropagation()}>
-          <BrandButton variant="secondary" className="w-full">
-            Log New Session
+        <Link href={`/sessions/new/${child.id}`} onClick={(event) => event.stopPropagation()}>
+          <BrandButton className="w-full">
+            Log Session
           </BrandButton>
         </Link>
-        <BrandButton variant="secondary" className="px-4" onClick={(event) => { event.stopPropagation(); onEdit(); }}>
+        <BrandButton variant="secondary" className="w-full" onClick={(event) => { event.stopPropagation(); onEdit(); }}>
           Edit
         </BrandButton>
-        <BrandButton variant="secondary" className="px-4" onClick={(event) => { event.stopPropagation(); onRemove(); }}>
+        <BrandButton variant="secondary" className="w-full" onClick={(event) => { event.stopPropagation(); onRemove(); }}>
           Remove
         </BrandButton>
       </div>

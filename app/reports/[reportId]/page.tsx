@@ -84,7 +84,7 @@ export default function ReportPage() {
     <ProtectedContent>
       <main className="min-h-screen bg-[#fcf8ff]">
         <TopNav />
-        <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="report-print-root mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between print:hidden">
           <div>
             <h1 className="text-3xl font-semibold text-[#1b1b23]">Parent Session Report</h1>
@@ -107,9 +107,9 @@ export default function ReportPage() {
           </div>
         </header>
 
-        <section className="grid gap-6 md:grid-cols-12 print:gap-4 print-page-compact">
+        <section className="grid gap-6 md:grid-cols-12 print:gap-3 print-page-compact">
           <div className="md:col-span-8">
-            <Card className="flex flex-col items-center gap-5 md:flex-row md:text-left print:p-4">
+            <Card className="report-print-card flex flex-col items-center gap-5 md:flex-row md:text-left print:p-3">
               <div className="relative flex h-32 w-32 flex-none items-center justify-center rounded-2xl bg-[#e1e0ff] text-4xl font-black text-[#4648d4]">
                 {initialsFromName(child.fullName)}
                 <span className="absolute -bottom-2 -right-2 rounded-lg border-2 border-white bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-2 py-1 text-[10px] font-bold text-white">
@@ -138,9 +138,9 @@ export default function ReportPage() {
           </div>
 
           <div className="md:col-span-4">
-            <Card className="h-full print:p-4">
-              <h3 className="mb-4 text-xl font-semibold">Progress Snapshot</h3>
-              <div className="space-y-5">
+            <Card className="report-print-card h-full print:p-3">
+              <h3 className="mb-3 text-xl font-semibold">Progress Snapshot</h3>
+              <div className="space-y-4">
                 <div>
                   <div className="mb-2 flex justify-between text-sm">
                     <span className="text-[#464554]">{session.keySkillWorkedOn}</span>
@@ -167,11 +167,11 @@ export default function ReportPage() {
             </Card>
           </div>
 
-          <ReportSectionCard title="Today's Focus" icon="📚" className="md:col-span-6 print:p-4">
+          <ReportSectionCard title="Today's Focus" icon="📚" className="report-print-card md:col-span-6 print:p-3">
             <p className="text-base leading-7 text-[#464554]">{report.todayFocus}</p>
           </ReportSectionCard>
 
-          <ReportSectionCard title="What Went Well" icon="✅" className="md:col-span-6 print:p-4">
+          <ReportSectionCard title="What Went Well" icon="✅" className="report-print-card md:col-span-6 print:p-3">
             <ul className="space-y-2 text-base leading-7 text-[#464554]">
               {report.whatWentWell.map((item) => (
                 <li key={item}>• {item}</li>
@@ -179,21 +179,21 @@ export default function ReportPage() {
             </ul>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Still Needs Support" icon="⚠️" className="md:col-span-4 print:p-4">
+          <ReportSectionCard title="Still Needs Support" icon="⚠️" className="report-print-card md:col-span-4 print:p-3">
             <p className="mb-4 text-sm leading-6 text-[#464554]">{report.stillNeedsSupport}</p>
             <span className="rounded-full bg-[#ffdad6] px-3 py-1 text-xs font-bold text-[#93000a]">{priorityLabel(session)}</span>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Confidence" icon="🧠" className="md:col-span-4 print:p-4">
+          <ReportSectionCard title="Confidence" icon="🧠" className="report-print-card md:col-span-4 print:p-3">
             <ProgressSegments value={session.confidenceRating} />
             <p className="mt-4 text-sm leading-6 text-[#464554]">{report.confidenceUnderstanding}</p>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Homework" icon="📝" className="md:col-span-4 print:p-4">
+          <ReportSectionCard title="Homework" icon="📝" className="report-print-card md:col-span-4 print:p-3">
             <p className="text-sm leading-6 text-[#464554]">{report.homeworkAssigned}</p>
           </ReportSectionCard>
 
-          <section className="rounded-3xl bg-[#6063ee] p-6 text-white shadow-lg md:col-span-4 print:p-4">
+          <section className="report-print-card rounded-3xl bg-[#6063ee] p-6 text-white shadow-lg md:col-span-4 print:p-3">
             <div className="mb-3 flex items-center gap-2">
               <span className="text-2xl">🎯</span>
               <h3 className="text-xl font-semibold">Next Focus</h3>
@@ -202,7 +202,7 @@ export default function ReportPage() {
             <p className="mt-5 text-sm text-white/80">Next session: to be scheduled</p>
           </section>
 
-          <ReportSectionCard title="Tutor Summary" icon="💬" className="md:col-span-8 print:p-4">
+          <ReportSectionCard title="Tutor Summary" icon="💬" className="report-print-card md:col-span-8 print:p-3">
             <p className="text-lg italic leading-8 text-[#1b1b23]">"{report.tutorSummary}"</p>
             <div className="mt-7 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] font-bold text-white">ED</div>
@@ -221,7 +221,9 @@ export default function ReportPage() {
           </pre>
         </details>
         </div>
-        <Footer />
+        <div className="print:hidden">
+          <Footer />
+        </div>
       </main>
     </ProtectedContent>
   );

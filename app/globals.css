@@ -64,6 +64,39 @@ body {
     box-shadow: none !important;
   }
 
+  .report-print-root {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .report-print-root header,
+  .report-print-root footer,
+  .report-print-root details,
+  .report-print-root [data-print-hide="true"] {
+    display: none !important;
+  }
+
+  .report-print-root section,
+  .report-print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-print-root .grid {
+    gap: 0.55rem !important;
+  }
+
+  .report-print-root .rounded-2xl,
+  .report-print-root .rounded-3xl {
+    border-radius: 0.75rem !important;
+  }
+
+  .report-print-root p,
+  .report-print-root li,
+  .report-print-root span {
+    line-height: 1.25 !important;
+  }
+
   main {
     padding-top: 0 !important;
   }
@@ -92,5 +125,10 @@ body {
 
   .print-page-compact {
     gap: 0.75rem !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
   }
 }
