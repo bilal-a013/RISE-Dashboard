@@ -23,6 +23,99 @@ function priorityLabel(session?: SessionLog) {
   return "Medium Priority";
 }
 
+function buildPlainEmail(child: ChildProfile, session: SessionLog, report: ParentReport, reportDate: string) {
+  return [
+    `Hi ${child.parentName},`,
+    "",
+    `Here is ${child.fullName}'s latest tutoring update from today's session (${reportDate}).`,
+    "",
+    `Today's Focus: ${report.todayFocus}`,
+    `What Went Well: ${report.whatWentWell.join(" • ")}`,
+    `Still Needs Support: ${report.stillNeedsSupport}`,
+    `Confidence: ${report.confidenceUnderstanding}`,
+    `Homework: ${report.homeworkAssigned}`,
+    `Next Focus: ${report.nextSessionFocus}`,
+    `Progress Snapshot: ${report.progressSnapshot.progressLabel} (${session.progressRating}/5)`,
+    "",
+    `${report.tutorSummary}`,
+    "",
+    `Kind regards,`,
+    "RISE Tutoring",
+  ].join("\n");
+}
+
+function buildStyledEmail(child: ChildProfile, session: SessionLog, report: ParentReport, reportDate: string) {
+  const cards = [
+    ["Today's Focus", report.todayFocus],
+    ["What Went Well", report.whatWentWell.join(" • ")],
+    ["Still Needs Support", report.stillNeedsSupport],
+    ["Confidence", report.confidenceUnderstanding],
+    ["Homework", report.homeworkAssigned],
+    ["Next Focus", report.nextSessionFocus],
+  ];
+
+  return `<!doctype html>
+  <html>
+    <body style="margin:0; padding:0; background:#fcf8ff; font-family:Arial,Helvetica,sans-serif; color:#1b1b23;">
+      <div style="max-width:640px; margin:0 auto; padding:18px 12px;">
+        <div style="background:#ffffff; border:1px solid #c7c4d7; border-radius:24px; overflow:hidden; box-shadow:0 10px 30px rgba(70,72,212,.08);">
+          <div style="background:linear-gradient(135deg,#4648d4 0%,#8127cf 100%); color:#ffffff; padding:22px 24px;">
+            <div style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; opacity:.82;">RISE Tutoring</div>
+            <div style="font-size:24px; font-weight:700; line-height:1.2; margin-top:6px;">${child.fullName}</div>
+            <div style="font-size:14px; opacity:.9; margin-top:6px;">${reportDate} · ${session.topic}</div>
+          </div>
+          <div style="padding:22px 24px;">
+            <p style="margin:0 0 14px; font-size:15px; line-height:1.6;">Hi ${child.parentName},</p>
+            <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">Here is ${child.fullName}'s latest tutoring update from today's session.</p>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+              <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; color:#4648d4;">${child.subjects.join(' / ')}</div>
+              <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; color:#4648d4;">${child.currentWorkingLevel} → ${child.targetLevel}</div>
+              <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; color:#4648d4;">${report.progressSnapshot.progressLabel}</div>
+            </div>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:separate; border-spacing:0 10px; margin-bottom:16px;">
+              <tr>
+                <td style="width:50%; padding-right:5px; vertical-align:top;">
+                  <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:18px; padding:12px 14px;">
+                    <div style="font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#4648d4; font-weight:700; margin-bottom:6px;">Progress Snapshot</div>
+                    <div style="font-size:14px; line-height:1.5; color:#1b1b23;">${report.progressSnapshot.progressLabel} · ${report.progressSnapshot.confidenceLabel} confidence</div>
+                  </div>
+                </td>
+                <td style="width:50%; padding-left:5px; vertical-align:top;">
+                  <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:18px; padding:12px 14px;">
+                    <div style="font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#4648d4; font-weight:700; margin-bottom:6px;">Current & Target</div>
+                    <div style="font-size:14px; line-height:1.5; color:#1b1b23;">${child.currentWorkingLevel} → ${child.targetLevel}</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+              ${cards
+                .map(
+                  ([label, value], index) => `
+                    <tr>
+                      <td style="width:${index < 2 ? "50%" : "100%"}; padding:${index < 2 ? (index % 2 === 0 ? "0 5px 0 0" : "0 0 0 5px") : "0"};${index >= 2 ? " vertical-align:top;" : ""}">
+                        <div style="border:1px solid #e9e6f3; background:#ffffff; border-radius:18px; padding:12px 14px;">
+                          <div style="font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#4648d4; font-weight:700; margin-bottom:6px;">${label}</div>
+                          <div style="font-size:14px; line-height:1.5; color:#1b1b23;">${String(value)}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  `
+                )
+                .join("")}
+            </table>
+            <div style="margin-top:14px; border-left:4px solid #4648d4; background:#fcf8ff; padding:12px 14px; border-radius:14px;">
+              <div style="font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#4648d4; font-weight:700; margin-bottom:6px;">Tutor Summary</div>
+              <div style="font-size:14px; line-height:1.6; color:#1b1b23;">${report.tutorSummary}</div>
+            </div>
+            <p style="margin:18px 0 0; font-size:14px; line-height:1.6;">Kind regards,<br/><strong>RISE Tutoring</strong></p>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>`;
+}
+
 export default function ReportPage() {
   const params = useParams<{ reportId: string }>();
   const [data, setData] = useState<{ child: ChildProfile; session: SessionLog; report: ParentReport } | null>(null);
@@ -53,58 +146,18 @@ export default function ReportPage() {
   const reportEmail = data?.child.parentEmail || "";
   const reportDate = data ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(data.session.sessionDate)) : "";
   const emailSubject = data ? `RISE Tutoring Report - ${data.child.fullName} - ${reportDate}` : "";
-  const emailText = data
+  const emailText = data ? buildPlainEmail(data.child, data.session, data.report, reportDate) : "";
+  const emailHtml = data ? buildStyledEmail(data.child, data.session, data.report, reportDate) : "";
+  const emailCards = data
     ? [
-        `Hi ${data.child.parentName},`,
-        "",
-        `Here is the RISE Tutoring report for ${data.child.fullName} from ${reportDate}.`,
-        "",
-        `Today’s focus: ${data.report.todayFocus}`,
-        `What went well: ${data.report.whatWentWell.join(" • ")}`,
-        `Still needs support: ${data.report.stillNeedsSupport}`,
-        `Homework: ${data.report.homeworkAssigned}`,
-        `Next focus: ${data.report.nextSessionFocus}`,
-        "",
-        `Tutor summary: ${data.report.tutorSummary}`,
-        "",
-        "Please attach the downloaded PDF before sending if you are sharing by email outside RISE Dashboard.",
-        "",
-        "Best,",
-        "Elena Dragan",
-      ].join("\n")
-    : "";
-  const emailHtml = data
-    ? `
-      <div style="font-family: Inter, Arial, sans-serif; background:#fcf8ff; padding:24px; color:#1b1b23;">
-        <div style="max-width:720px; margin:0 auto; background:#fff; border:1px solid #c7c4d7; border-radius:24px; overflow:hidden; box-shadow:0 10px 30px rgba(70,72,212,.08);">
-          <div style="background:linear-gradient(135deg,#4648d4 0%,#8127cf 100%); color:white; padding:22px 24px;">
-            <div style="font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.85;">RISE Tutoring</div>
-            <div style="font-size:24px; font-weight:700; margin-top:4px;">${emailSubject}</div>
-          </div>
-          <div style="padding:24px;">
-            <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Hi ${data.child.parentName},</p>
-            <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">Here is a concise summary of ${data.child.fullName}'s latest tutoring session.</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;">
-              ${[
-                ["Today's Focus", data.report.todayFocus],
-                ["What Went Well", data.report.whatWentWell.join(" • ")],
-                ["Still Needs Support", data.report.stillNeedsSupport],
-                ["Homework", data.report.homeworkAssigned],
-                ["Next Focus", data.report.nextSessionFocus],
-                ["Tutor Summary", data.report.tutorSummary],
-              ]
-                .map(
-                  ([label, value]) =>
-                    `<div style="border:1px solid #e9e6f3; border-radius:18px; padding:12px 14px; background:#f5f2fe;"><div style="font-size:11px; font-weight:700; color:#4648d4; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;">${label}</div><div style="font-size:14px; line-height:1.5; color:#1b1b23;">${String(value)}</div></div>`
-                )
-                .join("")}
-            </div>
-            <p style="margin:0; font-size:13px; color:#464554; line-height:1.5;">Please attach the downloaded PDF before sending if you are sharing this outside the dashboard.</p>
-            <p style="margin:18px 0 0; font-size:14px; line-height:1.6;">Best,<br/>Elena Dragan</p>
-          </div>
-        </div>
-      </div>`
-    : "";
+        { label: "Today's Focus", value: data.report.todayFocus, span: "md:col-span-2" },
+        { label: "What Went Well", value: data.report.whatWentWell.join(" • "), span: "md:col-span-2" },
+        { label: "Still Needs Support", value: data.report.stillNeedsSupport, span: "md:col-span-2" },
+        { label: "Confidence", value: data.report.confidenceUnderstanding, span: "md:col-span-1" },
+        { label: "Homework", value: data.report.homeworkAssigned, span: "md:col-span-1" },
+        { label: "Next Focus", value: data.report.nextSessionFocus, span: "md:col-span-2" },
+      ]
+    : [];
 
   async function confirmDelete() {
     if (!data) return;
@@ -132,7 +185,16 @@ export default function ReportPage() {
 
   async function copyEmail() {
     try {
-      await navigator.clipboard.writeText(`${emailSubject}\n\n${emailText}`);
+      if (navigator.clipboard.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/plain": new Blob([emailText], { type: "text/plain" }),
+            "text/html": new Blob([emailHtml], { type: "text/html" }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(emailHtml);
+      }
       setCopyStatus("Email copied.");
     } catch {
       setCopyStatus("Could not copy email.");
@@ -158,6 +220,11 @@ export default function ReportPage() {
   const date = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(session.sessionDate));
   const progressSkillOne = Math.min(95, 45 + session.progressRating * 10);
   const progressSkillTwo = Math.min(95, 35 + session.confidenceRating * 9);
+  const emailPreviewStyle = {
+    fontFamily: "Arial, Helvetica, sans-serif",
+    background: "#fcf8ff",
+    color: "#1b1b23",
+  } as const;
 
   return (
     <ProtectedContent>
@@ -378,7 +445,21 @@ export default function ReportPage() {
                       <div className="flex flex-wrap gap-2">
                         <BrandButton variant="secondary" onClick={copyEmail}>
                           <Copy className="h-4 w-4" />
-                          Copy
+                          Copy styled email
+                        </BrandButton>
+                        <BrandButton
+                          variant="secondary"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(emailText);
+                              setCopyStatus("Plain text copied.");
+                            } catch {
+                              setCopyStatus("Could not copy plain text.");
+                            }
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                          Copy plain text
                         </BrandButton>
                         <BrandButton
                           variant="secondary"
@@ -395,35 +476,36 @@ export default function ReportPage() {
                     </div>
                     {copyStatus ? <p className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] px-3 py-2 text-sm text-[#464554]">{copyStatus}</p> : null}
                     <div className="overflow-hidden rounded-3xl border border-[#c7c4d7] bg-white">
-                      <div className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-5 py-4 text-white">
+                      <div
+                        className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-5 py-4 text-white"
+                        style={emailPreviewStyle}
+                      >
                         <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">RISE Tutoring</p>
                         <h4 className="mt-1 text-2xl font-semibold">{child.fullName}</h4>
-                        <p className="text-sm opacity-90">{reportDate} · {session.topic}</p>
+                        <p className="text-sm opacity-90">
+                          {reportDate} · {session.topic}
+                        </p>
                       </div>
-                      <div className="grid gap-3 p-5 md:grid-cols-2">
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Today&apos;s Focus</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.todayFocus}</p>
-                        </div>
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">What Went Well</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.whatWentWell.join(" • ")}</p>
-                        </div>
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Still Needs Support</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.stillNeedsSupport}</p>
-                        </div>
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Homework</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.homeworkAssigned}</p>
-                        </div>
+                      <div className="grid gap-3 p-5 md:grid-cols-2" style={emailPreviewStyle}>
                         <div className="rounded-2xl bg-[#f5f2fe] p-4 md:col-span-2">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Next Focus</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.nextSessionFocus}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Parent update</p>
+                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">
+                            Here is {child.fullName}&apos;s latest tutoring update from today&apos;s session.
+                          </p>
+                        </div>
+                        {emailCards.map((item) => (
+                          <div key={item.label} className={`rounded-2xl bg-white p-4 border border-[#e9e6f3] ${item.span}`}>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">{item.label}</p>
+                            <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{item.value}</p>
+                          </div>
+                        ))}
+                        <div className="rounded-2xl bg-[#f5f2fe] p-4 md:col-span-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Tutor summary</p>
+                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.tutorSummary}</p>
                         </div>
                       </div>
                     </div>
-                    <p className="text-sm leading-6 text-[#464554]">{emailText}</p>
+                    <p className="text-sm leading-6 text-[#464554]">For best formatting, copy the styled email and paste it into Gmail.</p>
                   </Card>
                 </div>
                 <div className="space-y-4">
@@ -442,7 +524,7 @@ export default function ReportPage() {
                       <p className="mt-1 text-sm text-[#464554]">{emailSubject}</p>
                     </div>
                     <div className="rounded-2xl border border-[#c7c4d7] bg-[#fffaf2] p-4 text-sm leading-6 text-[#764800]">
-                      Download the PDF first, then open or copy the email draft. Mailto cannot attach the file automatically, so attach the PDF manually before sending.
+                      For best formatting, copy the styled email and paste it into Gmail. The plain-text draft is available if you prefer it.
                     </div>
                     <div className="flex flex-wrap justify-end gap-3">
                       <BrandButton variant="secondary" onClick={() => setSendOpen(false)}>

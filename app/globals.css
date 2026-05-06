@@ -76,9 +76,9 @@ body {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
-    transform: scale(0.95);
+    transform: scale(0.98);
     transform-origin: top left;
-    width: 105.5% !important;
+    width: 102.5% !important;
   }
 
   .report-print-root header,
@@ -90,7 +90,7 @@ body {
 
   .report-print-root section,
   .report-print-card {
-    padding: 0.5rem !important;
+    padding: 0.58rem !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
@@ -116,19 +116,19 @@ body {
   }
 
   h1 {
-    font-size: 17pt !important;
+    font-size: 18.5pt !important;
     line-height: 1.1 !important;
     margin: 0 0 4px !important;
   }
 
   h2 {
-    font-size: 11.5pt !important;
+    font-size: 12.5pt !important;
     line-height: 1.15 !important;
     margin: 0 0 3px !important;
   }
 
   h3 {
-    font-size: 10.5pt !important;
+    font-size: 11pt !important;
     line-height: 1.15 !important;
     margin: 0 0 3px !important;
   }
@@ -139,28 +139,28 @@ body {
   input,
   textarea,
   button {
-    font-size: 8.5pt !important;
-    line-height: 1.18 !important;
+    font-size: 9.2pt !important;
+    line-height: 1.22 !important;
   }
 
   .print-page-compact {
-    gap: 0.35rem !important;
+    gap: 0.45rem !important;
   }
 
   .print-card,
   .report-print-card {
-    padding: 0.35rem 0.45rem !important;
-    margin-bottom: 0.25rem !important;
+    padding: 0.5rem 0.6rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .print-progress {
-    height: 4px !important;
+    height: 6px !important;
   }
 
   .print-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 0.35rem !important;
+    gap: 0.45rem !important;
   }
 
   .print-only {
