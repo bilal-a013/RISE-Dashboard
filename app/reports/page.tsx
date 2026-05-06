@@ -210,7 +210,8 @@ export default function ReportsPage() {
                     Cancel
                   </BrandButton>
                   <BrandButton
-                    onClick={() => deleteText.trim() === "DELETE" ? confirmDelete(deleteTarget) : setStatus("Please type DELETE to confirm.")}
+                    disabled={deleteText.trim() !== "DELETE"}
+                    onClick={() => confirmDelete(deleteTarget)}
                   >
                     Confirm Delete
                   </BrandButton>

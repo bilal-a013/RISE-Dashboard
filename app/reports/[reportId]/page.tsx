@@ -132,10 +132,10 @@ export default function ReportPage() {
           </div>
         </header>
 
-        <section className="grid gap-6 md:grid-cols-12 print:gap-3 print-page-compact">
+        <section className="grid gap-6 md:grid-cols-12 print:gap-2 print-page-compact">
           <div className="md:col-span-8">
-            <Card className="report-print-card flex flex-col items-center gap-5 md:flex-row md:text-left print:p-3">
-              <div className="relative flex h-32 w-32 flex-none items-center justify-center rounded-2xl bg-[#e1e0ff] text-4xl font-black text-[#4648d4]">
+            <Card className="report-print-card flex flex-col items-center gap-5 md:flex-row md:text-left print:p-2">
+              <div className="relative flex h-24 w-24 flex-none items-center justify-center rounded-2xl bg-[#e1e0ff] text-3xl font-black text-[#4648d4] print:h-20 print:w-20 print:text-2xl">
                 {initialsFromName(child.fullName)}
                 <span className="absolute -bottom-2 -right-2 rounded-lg border-2 border-white bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-2 py-1 text-[10px] font-bold text-white">
                   RISE BADGE
@@ -143,48 +143,48 @@ export default function ReportPage() {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <span className="text-xs font-bold uppercase tracking-wide text-[#4648d4]">Student Profile</span>
-                <h2 className="mt-1 text-3xl font-semibold">{child.fullName}</h2>
-                <div className="mt-3 flex flex-wrap justify-center gap-2 md:justify-start">
-                  <span className="rounded-full bg-[#e9e6f3] px-4 py-2 text-sm font-semibold text-[#464554]">
+                <h2 className="mt-1 text-3xl font-semibold print:mt-0 print:text-[18px]">{child.fullName}</h2>
+                <div className="mt-3 flex flex-wrap justify-center gap-2 md:justify-start print:mt-2 print:gap-1.5">
+                  <span className="rounded-full bg-[#e9e6f3] px-4 py-2 text-sm font-semibold text-[#464554] print:px-3 print:py-1 print:text-[10px]">
                     {child.subjects.join(" / ")} · {child.yearGroup}
                   </span>
-                  <span className="rounded-full bg-[#f0dbff] px-4 py-2 text-sm font-semibold text-[#6900b3]">60 Min Session</span>
+                  <span className="rounded-full bg-[#f0dbff] px-4 py-2 text-sm font-semibold text-[#6900b3] print:px-3 print:py-1 print:text-[10px]">60 Min Session</span>
                 </div>
               </div>
               <div className="w-full md:w-48">
-                <p className="mb-2 text-sm font-semibold text-[#464554]">Overall Progress Indicator</p>
+                <p className="mb-2 text-sm font-semibold text-[#464554] print:mb-1 print:text-[10px]">Overall Progress Indicator</p>
                 <ProgressSegments value={session.progressRating} />
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xl font-bold text-[#4648d4]">{session.progressRating}/5</span>
-                  <span className="text-sm italic text-[#464554]">{report.progressSnapshot.progressLabel}</span>
+                <div className="mt-2 flex items-center justify-between print:mt-1">
+                  <span className="text-xl font-bold text-[#4648d4] print:text-[14px]">{session.progressRating}/5</span>
+                  <span className="text-sm italic text-[#464554] print:text-[10px]">{report.progressSnapshot.progressLabel}</span>
                 </div>
               </div>
             </Card>
           </div>
 
           <div className="md:col-span-4">
-            <Card className="report-print-card h-full print:p-3">
-              <h3 className="mb-3 text-xl font-semibold">Progress Snapshot</h3>
-              <div className="space-y-4">
+            <Card className="report-print-card h-full print:p-2">
+              <h3 className="mb-2 text-xl font-semibold print:mb-1 print:text-[12px]">Progress Snapshot</h3>
+              <div className="space-y-3">
                 <div>
-                  <div className="mb-2 flex justify-between text-sm">
+                  <div className="mb-1.5 flex justify-between text-sm print:mb-1 print:text-[10px]">
                     <span className="text-[#464554]">{session.keySkillWorkedOn}</span>
                     <span className="font-bold">{progressSkillOne}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#efecf8]">
+                  <div className="h-1.5 rounded-full bg-[#efecf8] print:h-1">
                     <div className="h-full rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]" style={{ width: `${progressSkillOne}%` }} />
                   </div>
                 </div>
                 <div>
-                  <div className="mb-2 flex justify-between text-sm">
+                  <div className="mb-1.5 flex justify-between text-sm print:mb-1 print:text-[10px]">
                     <span className="text-[#464554]">{session.topic}</span>
                     <span className="font-bold">{progressSkillTwo}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#efecf8]">
+                  <div className="h-1.5 rounded-full bg-[#efecf8] print:h-1">
                     <div className="h-full rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]" style={{ width: `${progressSkillTwo}%` }} />
                   </div>
                 </div>
-                <div className="border-t border-[#c7c4d7] pt-4 text-sm">
+                <div className="border-t border-[#c7c4d7] pt-3 text-sm print:pt-2 print:text-[10px]">
                   <div className="flex justify-between"><span className="text-[#767586]">Target Proficiency</span><b>{child.targetLevel}</b></div>
                   <div className="mt-2 flex justify-between"><span className="text-[#767586]">Current Standing</span><b>{child.currentWorkingLevel}</b></div>
                 </div>
@@ -192,48 +192,50 @@ export default function ReportPage() {
             </Card>
           </div>
 
-          <ReportSectionCard title="Today's Focus" icon="📚" className="report-print-card md:col-span-6 print:p-3">
-            <p className="text-base leading-7 text-[#464554]">{report.todayFocus}</p>
+          <ReportSectionCard title="Today's Focus" icon="📚" className="report-print-card md:col-span-6 print:p-2">
+            <p className="text-sm leading-6 text-[#464554] print:text-[10px]">{report.todayFocus}</p>
           </ReportSectionCard>
 
-          <ReportSectionCard title="What Went Well" icon="✅" className="report-print-card md:col-span-6 print:p-3">
-            <ul className="space-y-2 text-base leading-7 text-[#464554]">
+          <ReportSectionCard title="What Went Well" icon="✅" className="report-print-card md:col-span-6 print:p-2">
+            <ul className="space-y-1.5 text-sm leading-6 text-[#464554] print:text-[10px]">
               {report.whatWentWell.map((item) => (
                 <li key={item}>• {item}</li>
               ))}
             </ul>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Still Needs Support" icon="⚠️" className="report-print-card md:col-span-4 print:p-3">
-            <p className="mb-4 text-sm leading-6 text-[#464554]">{report.stillNeedsSupport}</p>
-            <span className="rounded-full bg-[#ffdad6] px-3 py-1 text-xs font-bold text-[#93000a]">{priorityLabel(session)}</span>
+          <ReportSectionCard title="Still Needs Support" icon="⚠️" className="report-print-card md:col-span-4 print:p-2">
+            <p className="mb-3 text-sm leading-6 text-[#464554] print:mb-2 print:text-[10px]">{report.stillNeedsSupport}</p>
+            <span className="rounded-full bg-[#ffdad6] px-3 py-1 text-xs font-bold text-[#93000a] print:px-2 print:py-0.5 print:text-[9px]">{priorityLabel(session)}</span>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Confidence" icon="🧠" className="report-print-card md:col-span-4 print:p-3">
+          <ReportSectionCard title="Confidence" icon="🧠" className="report-print-card md:col-span-4 print:p-2">
             <ProgressSegments value={session.confidenceRating} />
-            <p className="mt-4 text-sm leading-6 text-[#464554]">{report.confidenceUnderstanding}</p>
+            <p className="mt-3 text-sm leading-6 text-[#464554] print:mt-2 print:text-[10px]">{report.confidenceUnderstanding}</p>
           </ReportSectionCard>
 
-          <ReportSectionCard title="Homework" icon="📝" className="report-print-card md:col-span-4 print:p-3">
-            <p className="text-sm leading-6 text-[#464554]">{report.homeworkAssigned}</p>
+          <ReportSectionCard title="Homework" icon="📝" className="report-print-card md:col-span-4 print:p-2">
+            <p className="text-sm leading-6 text-[#464554] print:text-[10px]">{report.homeworkAssigned}</p>
           </ReportSectionCard>
 
-          <section className="report-print-card rounded-3xl bg-[#6063ee] p-6 text-white shadow-lg md:col-span-4 print:p-3">
+          <section className="report-print-card rounded-3xl bg-[#6063ee] p-6 text-white shadow-lg md:col-span-4 print:p-2">
             <div className="mb-3 flex items-center gap-2">
-              <span className="text-2xl">🎯</span>
-              <h3 className="text-xl font-semibold">Next Focus</h3>
+              <span className="text-2xl print:text-lg">🎯</span>
+              <h3 className="text-xl font-semibold print:text-[12px]">Next Focus</h3>
             </div>
-            <p className="leading-7 text-white/90">{report.nextSessionFocus}</p>
-            <p className="mt-5 text-sm text-white/80">Next session: to be scheduled</p>
+            <p className="leading-7 text-white/90 print:text-[10px]">{report.nextSessionFocus}</p>
+            <p className="mt-4 text-sm text-white/80 print:mt-2 print:text-[9px]">Next session: to be scheduled</p>
           </section>
 
-          <ReportSectionCard title="Tutor Summary" icon="💬" className="report-print-card md:col-span-8 print:p-3">
-            <p className="text-lg italic leading-8 text-[#1b1b23]">"{report.tutorSummary}"</p>
-            <div className="mt-7 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] font-bold text-white">ED</div>
+          <ReportSectionCard title="Tutor Summary" icon="💬" className="report-print-card md:col-span-8 print:p-2">
+            <p className="text-base italic leading-7 text-[#1b1b23] print:text-[10px]">"{report.tutorSummary}"</p>
+            <div className="mt-5 flex items-center gap-3 print:mt-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] font-bold text-white print:h-8 print:w-8">
+                ED
+              </div>
               <div>
-                <p className="font-bold text-[#1b1b23]">Elena Dragan</p>
-                <p className="text-sm text-[#464554]">Senior Mathematics Lead</p>
+                <p className="font-bold text-[#1b1b23] print:text-[10px]">Elena Dragan</p>
+                <p className="text-sm text-[#464554] print:text-[9px]">Senior Mathematics Lead</p>
               </div>
             </div>
           </ReportSectionCard>
@@ -267,7 +269,10 @@ export default function ReportPage() {
                 >
                   Cancel
                 </BrandButton>
-                <BrandButton onClick={() => (deleteText.trim() === "DELETE" ? confirmDelete() : setStatus("Please type DELETE to confirm."))}>
+                <BrandButton
+                  disabled={deleteText.trim() !== "DELETE"}
+                  onClick={() => confirmDelete()}
+                >
                   Confirm Delete
                 </BrandButton>
               </div>

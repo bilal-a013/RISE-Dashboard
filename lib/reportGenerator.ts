@@ -17,10 +17,10 @@ export const confidenceLabels: Record<Rating, string> = {
 };
 
 const toneOpeners: Record<ReportTone, string> = {
-  balanced: "This was a useful session with a clear learning focus and practical next step.",
-  encouraging: "This was an encouraging session, with positive signs of growing confidence.",
-  direct: "The main outcome is clear: progress was made, and the next priority is targeted practice.",
-  detailed: "This session gave a helpful picture of current understanding, confidence, and the next learning priority.",
+  balanced: "A clear session with a practical next step.",
+  encouraging: "A positive session with growing confidence.",
+  direct: "Progress was made. The next priority is targeted practice.",
+  detailed: "A useful session with clear understanding and next steps.",
 };
 
 function splitSentences(notes: string) {
@@ -61,23 +61,21 @@ export function generateParentReport(
 
   const whatWentWell = [
     positiveNote || `${child.preferredName || child.fullName} engaged well with ${session.keySkillWorkedOn.toLowerCase()}.`,
-    session.effortEngagement >= 4
-      ? "Effort and engagement were strong throughout the session."
-      : "Effort was steady, with some prompting needed to maintain pace.",
+    session.effortEngagement >= 4 ? "Effort and engagement were strong." : "Effort was steady with some prompting.",
   ];
 
   const stillNeedsSupport =
     supportNote ||
     (session.understandingToday === "lots-of-help"
       ? "The core ideas still need careful guided practice before they feel secure."
-      : "A short recap next time will help make the learning more automatic.");
+      : "A short recap next time will help consolidate the learning.");
 
   const confidenceUnderstanding =
     session.confidenceRating >= 4
-      ? `${child.preferredName || child.fullName} showed good confidence and was able to explain parts of the work independently.`
+      ? `${child.preferredName || child.fullName} showed good confidence and could explain parts of the work independently.`
       : session.confidenceRating === 3
-        ? `${child.preferredName || child.fullName} showed steady confidence, especially after examples were modelled.`
-        : `${child.preferredName || child.fullName} will benefit from more reassurance and smaller practice steps.`;
+        ? `${child.preferredName || child.fullName} showed steady confidence after examples were modelled.`
+        : `${child.preferredName || child.fullName} will benefit from smaller practice steps and reassurance.`;
 
   return {
     id: crypto.randomUUID(),
@@ -101,7 +99,7 @@ export function generateParentReport(
         ? `Compared with ${previous.topic}, this session showed ${session.progressRating >= previous.progressRating ? "stronger momentum" : "a need for more consolidation"}.`
         : "This is the first stored comparison point for this child.",
     },
-    tutorSummary: `${toneOpeners[session.reportTone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}, and the best next step is ${nextFocus.toLowerCase()}.`,
+    tutorSummary: `${toneOpeners[session.reportTone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}. Next step: ${nextFocus.toLowerCase()}.`,
     generatedAt: new Date().toISOString(),
   };
 }

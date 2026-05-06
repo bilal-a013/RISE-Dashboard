@@ -220,6 +220,11 @@ on reports for update
 using (tutor_id = auth.uid())
 with check (tutor_id = auth.uid());
 
+drop policy if exists "Tutors can delete own reports" on reports;
+create policy "Tutors can delete own reports"
+on reports for delete
+using (tutor_id = auth.uid());
+
 drop policy if exists "Tutors can read own parent replies" on parent_replies;
 create policy "Tutors can read own parent replies"
 on parent_replies for select
