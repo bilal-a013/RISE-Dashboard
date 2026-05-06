@@ -61,21 +61,21 @@ export function generateParentReport(
 
   const whatWentWell = [
     positiveNote || `${child.preferredName || child.fullName} engaged well with ${session.keySkillWorkedOn.toLowerCase()}.`,
-    session.effortEngagement >= 4 ? "Effort and engagement were strong." : "Effort was steady with some prompting.",
+    session.effortEngagement >= 4 ? "Effort and engagement were strong." : "Effort was steady.",
   ];
 
   const stillNeedsSupport =
     supportNote ||
     (session.understandingToday === "lots-of-help"
-      ? "The core ideas still need careful guided practice before they feel secure."
+      ? "Core ideas still need guided practice."
       : "A short recap next time will help consolidate the learning.");
 
   const confidenceUnderstanding =
     session.confidenceRating >= 4
-      ? `${child.preferredName || child.fullName} showed good confidence and could explain parts of the work independently.`
+      ? `${child.preferredName || child.fullName} showed good confidence and could explain parts of the work.`
       : session.confidenceRating === 3
         ? `${child.preferredName || child.fullName} showed steady confidence after examples were modelled.`
-        : `${child.preferredName || child.fullName} will benefit from smaller practice steps and reassurance.`;
+        : `${child.preferredName || child.fullName} will benefit from smaller practice steps.`;
 
   return {
     id: crypto.randomUUID(),
@@ -99,7 +99,7 @@ export function generateParentReport(
         ? `Compared with ${previous.topic}, this session showed ${session.progressRating >= previous.progressRating ? "stronger momentum" : "a need for more consolidation"}.`
         : "This is the first stored comparison point for this child.",
     },
-    tutorSummary: `${toneOpeners[session.reportTone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}. Next step: ${nextFocus.toLowerCase()}.`,
+    tutorSummary: `${toneOpeners[session.reportTone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}. Next: ${nextFocus.toLowerCase()}.`,
     generatedAt: new Date().toISOString(),
   };
 }

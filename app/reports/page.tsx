@@ -130,7 +130,6 @@ export default function ReportsPage() {
               <div className="grid gap-4">
                 {reports.map((report) => {
                   const date = report.sessions?.session_date || report.created_at || "";
-                  const mailto = `mailto:${report.sent_to || report.students?.parent_email || ""}?subject=${encodeURIComponent(report.title)}`;
                   return (
                     <Card key={report.id} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div>
@@ -148,18 +147,18 @@ export default function ReportsPage() {
                             View
                           </BrandButton>
                         </Link>
-                        <Link href={`/reports/${report.id}`}>
+                        <Link href={`/reports/${report.id}/edit`}>
                           <BrandButton variant="secondary">
                             <Edit3 className="h-4 w-4" />
                             Edit
                           </BrandButton>
                         </Link>
-                        <a href={mailto}>
+                        <Link href={`/reports/${report.id}`}>
                           <BrandButton>
                             <Mail className="h-4 w-4" />
                             {report.sent_status === "sent" ? "Resend" : "Send"}
                           </BrandButton>
-                        </a>
+                        </Link>
                         <BrandButton
                           variant="secondary"
                           onClick={() => {

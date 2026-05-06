@@ -374,6 +374,40 @@ export async function insertReport(report: ParentReport, session: SessionLog, ch
   return data as ReportRow;
 }
 
+export async function updateReport(
+  reportId: string,
+  updates: Partial<{
+    title: string;
+    body: string | null;
+    sent_status: string | null;
+    sent_to: string | null;
+    sent_at: string | null;
+  }>
+) {
+  const client = requireSupabase();
+  const tutorId = await getCurrentUserId();
+  const row = {
+    ...updates,
+    sent_to: cleanText(updates.sent_to),
+    sent_at: cleanText(updates.sent_at),
+  };
+  const { error } = await client
+    .from("reports")
+    .update(row)
+    .eq("id", reportId)
+    .eq("tutor_id", tutorId);
+  if (error) throw error;
+  return { id: reportId, ...row } as ReportRow;
+}
+
+export async function markReportSent(reportId: string, sentTo?: string | null) {
+  return updateReport(reportId, {
+    sent_status: "sent",
+    sent_to: cleanText(sentTo),
+    sent_at: new Date().toISOString(),
+  });
+}
+
 export async function deleteReport(reportId: string) {
   const client = requireSupabase();
   const tutorId = await getCurrentUserId();
