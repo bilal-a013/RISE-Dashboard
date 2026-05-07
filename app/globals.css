@@ -11,45 +11,47 @@ html.dark {
 }
 
 :root {
-  --rise-bg: #fbf7ff;
+  --rise-bg: #f7f3fc;
+  --rise-bg-elevated: #fbf8ff;
   --rise-surface: #ffffff;
-  --rise-surface-soft: #f4efff;
-  --rise-border: #d8d0ea;
-  --rise-border-strong: #c7bde1;
-  --rise-text: #1d1d27;
-  --rise-text-muted: #5f6070;
-  --rise-text-soft: #8a8b9a;
-  --rise-purple: #5546e8;
-  --rise-purple-2: #8a22d8;
-  --rise-purple-soft: #eee9ff;
-  --rise-shadow: 0 14px 35px rgba(62, 45, 125, 0.08);
+  --rise-surface-soft: #f3eefb;
+  --rise-border: #d8d1e8;
+  --rise-border-strong: #c9bfdc;
+  --rise-text: #1f2230;
+  --rise-heading: #171927;
+  --rise-text-muted: #616579;
+  --rise-purple: #5a4ff0;
+  --rise-purple-2: #9a35e8;
+  --rise-purple-soft: #ece7ff;
+  --rise-shadow: 0 12px 30px rgba(71, 52, 140, 0.08);
   --rise-field: #ffffff;
-  --rise-field-text: #1d1d27;
-  --rise-field-border: #d8d0ea;
-  --rise-chip: #f4efff;
-  --rise-chip-text: #5f6070;
+  --rise-field-text: #1f2230;
+  --rise-field-border: #d8d1e8;
+  --rise-chip: #f3eefb;
+  --rise-chip-text: #616579;
   --rise-nav: rgba(255, 255, 255, 0.95);
 }
 
 [data-theme="dark"] {
-  --rise-bg: #0b1020;
-  --rise-surface: #111827;
-  --rise-surface-soft: #151f32;
-  --rise-border: #2b3650;
-  --rise-border-strong: #3a4663;
-  --rise-text: #f5f7fb;
-  --rise-text-muted: #c2c8d6;
-  --rise-text-soft: #8f9aad;
+  --rise-bg: #111827;
+  --rise-bg-elevated: #172033;
+  --rise-surface: #1b2436;
+  --rise-surface-soft: #222c40;
+  --rise-border: #334056;
+  --rise-border-strong: #41506a;
+  --rise-text: #eef2fb;
+  --rise-heading: #ffffff;
+  --rise-text-muted: #b4bfd3;
   --rise-purple: #8b7cf6;
-  --rise-purple-2: #b45cff;
-  --rise-purple-soft: rgba(139, 124, 246, 0.16);
-  --rise-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
-  --rise-field: #111827;
-  --rise-field-text: #f5f7fb;
-  --rise-field-border: #2b3650;
-  --rise-chip: #151f32;
-  --rise-chip-text: #c2c8d6;
-  --rise-nav: rgba(15, 23, 42, 0.95);
+  --rise-purple-2: #bc68ff;
+  --rise-purple-soft: rgba(139, 124, 246, 0.18);
+  --rise-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+  --rise-field: #1b2436;
+  --rise-field-text: #eef2fb;
+  --rise-field-border: #334056;
+  --rise-chip: #222c40;
+  --rise-chip-text: #b4bfd3;
+  --rise-nav: rgba(19, 27, 44, 0.92);
 }
 
 body {
@@ -203,8 +205,17 @@ body {
   background-color: var(--rise-bg) !important;
 }
 
+.dark [class*="bg-[#fbf7ff]"],
+.dark [class*="bg-[#f7f3fc]"] {
+  background-color: var(--rise-bg) !important;
+}
+
 .dark [class*="bg-[#f5f2fe]"],
 .dark [class*="bg-[#efecf8]"] {
+  background-color: var(--rise-surface-soft) !important;
+}
+
+.dark [class*="bg-[#f3eefb]"] {
   background-color: var(--rise-surface-soft) !important;
 }
 
@@ -221,6 +232,14 @@ body {
   color: var(--rise-text) !important;
 }
 
+.dark [class*="text-[#1f2230]"] {
+  color: var(--rise-text) !important;
+}
+
+.dark [class*="text-[#171927]"] {
+  color: var(--rise-heading) !important;
+}
+
 .dark [class*="text-[#464554]"] {
   color: var(--rise-text-muted) !important;
 }
@@ -235,6 +254,15 @@ body {
   background: var(--rise-field) !important;
   color: var(--rise-field-text) !important;
   border-color: var(--rise-field-border) !important;
+}
+
+.dark .rise-button-secondary {
+  background: var(--rise-surface);
+  color: var(--rise-text);
+}
+
+.dark .rise-button-primary {
+  box-shadow: 0 14px 28px rgba(139, 124, 246, 0.18);
 }
 
 .dark input::placeholder,

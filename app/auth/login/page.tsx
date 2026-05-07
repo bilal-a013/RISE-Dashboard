@@ -83,20 +83,20 @@ export default function LoginPage() {
             <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)]" />
           </div>
 
-          <div className="rounded-2xl border border-[#c7c4d7] bg-white p-8 shadow-sm">
+          <div className="rise-panel rounded-2xl p-8">
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-semibold text-[#1b1b23]">Tutor Portal</h2>
-              <p className="mt-2 text-sm text-[#464554]">Log sessions, track progress, and keep parents updated.</p>
+              <h2 className="text-2xl font-semibold text-[var(--rise-heading)]">Tutor Portal</h2>
+              <p className="mt-2 text-sm text-[var(--rise-text-muted)]">Log sessions, track progress, and keep parents updated.</p>
             </div>
 
-            <div className="mb-5 grid grid-cols-2 rounded-2xl bg-[#f5f2fe] p-1">
+            <div className="mb-5 grid grid-cols-2 rounded-2xl bg-[var(--rise-surface-soft)] p-1">
               {(["login", "signup"] as const).map((option) => (
                 <button
                   key={option}
                   type="button"
                   onClick={() => setMode(option)}
                   className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                    mode === option ? "bg-white text-[#4648d4] shadow-sm" : "text-[#464554]"
+                    mode === option ? "bg-[var(--rise-surface)] text-[var(--rise-purple)] shadow-sm" : "text-[var(--rise-text-muted)]"
                   }`}
                 >
                   {option === "login" ? "Log in" : "Sign up"}
@@ -105,7 +105,7 @@ export default function LoginPage() {
             </div>
 
             {!isSupabaseConfigured ? (
-              <div className="mb-5 rounded-xl border border-[#c7c4d7] bg-[#f5f2fe] p-4 text-sm leading-6 text-[#464554]">
+              <div className="mb-5 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4 text-sm leading-6 text-[var(--rise-text-muted)]">
                 Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to enable authentication.
               </div>
             ) : null}
@@ -113,38 +113,38 @@ export default function LoginPage() {
             <form className="space-y-5" onSubmit={submitAuth}>
               {mode === "signup" ? (
                 <label className="block space-y-2">
-                  <span className="text-sm font-medium text-[#464554]">Full name</span>
+                  <span className="text-sm font-medium text-[var(--rise-text-muted)]">Full name</span>
                   <input
                     value={fullName}
                     onChange={(event) => setFullName(event.target.value)}
                     placeholder="e.g. Elena Dragan"
-                    className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                    className="rise-input h-12 w-full px-4"
                   />
                 </label>
               ) : null}
 
               <label className="block space-y-2">
-                <span className="text-sm font-medium text-[#464554]">Email address</span>
+                <span className="text-sm font-medium text-[var(--rise-text-muted)]">Email address</span>
                 <input
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   type="email"
                   placeholder="name@education.com"
-                  className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                  className="rise-input h-12 w-full px-4"
                   required
                 />
               </label>
               <label className="block space-y-2">
-                <span className="flex items-center justify-between text-sm font-medium text-[#464554]">
+                <span className="flex items-center justify-between text-sm font-medium text-[var(--rise-text-muted)]">
                   Password
-                  <span className="text-xs font-semibold text-[#767586]">Minimum 6 characters</span>
+                  <span className="text-xs font-semibold text-[var(--rise-text-soft)]">Minimum 6 characters</span>
                 </span>
                 <input
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type="password"
                   placeholder="Password"
-                  className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 text-[#1b1b23] outline-none transition placeholder:text-[#767586] focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white"
+                  className="rise-input h-12 w-full px-4"
                   required
                 />
               </label>
@@ -155,19 +155,19 @@ export default function LoginPage() {
             </form>
 
             <div className="my-7 flex items-center gap-4">
-              <span className="h-px flex-1 bg-[#c7c4d7]" />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#767586]">or</span>
-              <span className="h-px flex-1 bg-[#c7c4d7]" />
+              <span className="h-px flex-1 bg-[var(--rise-border)]" />
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">or</span>
+              <span className="h-px flex-1 bg-[var(--rise-border)]" />
             </div>
 
             <BrandButton variant="secondary" className="w-full opacity-60" disabled>
               Continue with Google - Coming Soon
             </BrandButton>
 
-            {status ? <p className="mt-5 rounded-xl bg-[#f5f2fe] p-3 text-center text-sm font-semibold text-[#464554]">{status}</p> : null}
+            {status ? <p className="mt-5 rounded-xl bg-[var(--rise-surface-soft)] p-3 text-center text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-2 text-sm text-[#767586]">
+          <div className="mt-8 flex items-center justify-center gap-2 text-sm text-[var(--rise-text-soft)]">
             <ShieldCheck className="h-4 w-4" />
             Secure, encrypted connection for educator data privacy.
           </div>

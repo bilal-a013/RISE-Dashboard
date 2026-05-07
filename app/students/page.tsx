@@ -47,13 +47,13 @@ function StudentsPageContent() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold text-[#1b1b23]">Students</h1>
-              <p className="mt-2 text-lg text-[#464554]">Manage saved tutoring profiles.</p>
+              <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Students</h1>
+              <p className="mt-2 text-lg text-[var(--rise-text-muted)]">Manage saved tutoring profiles.</p>
             </div>
             <Link href="/students/new">
               <BrandButton>
@@ -63,11 +63,11 @@ function StudentsPageContent() {
             </Link>
           </header>
 
-          {saved ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-[#f5f2fe] p-4 text-sm font-semibold text-[#4648d4]">Profile saved successfully.</p> : null}
-          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+          {saved ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4 text-sm font-semibold text-[var(--rise-purple)]">Profile saved successfully.</p> : null}
+          {status ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
 
           {filter === "attention" ? (
-            <p className="mb-6 rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4 text-sm font-semibold text-[#4648d4]">
+            <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4 text-sm font-semibold text-[var(--rise-purple)]">
               Showing students who may need attention.
             </p>
           ) : null}
@@ -122,9 +122,9 @@ function StudentsPageContent() {
             </section>
           ) : (
             <Card className="text-center">
-              <UsersRound className="mx-auto h-10 w-10 text-[#767586]" />
-              <h2 className="mt-4 text-xl font-semibold text-[#1b1b23]">No saved students</h2>
-              <p className="mt-2 text-[#464554]">Create a child profile once, then every session and report can link back to it.</p>
+              <UsersRound className="mx-auto h-10 w-10 text-[var(--rise-text-soft)]" />
+              <h2 className="mt-4 text-xl font-semibold text-[var(--rise-heading)]">No saved students</h2>
+              <p className="mt-2 text-[var(--rise-text-muted)]">Create a child profile once, then every session and report can link back to it.</p>
               <Link href="/students/new" className="mt-5 inline-block">
                 <BrandButton>Create Child Profile</BrandButton>
               </Link>

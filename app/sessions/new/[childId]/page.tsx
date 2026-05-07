@@ -174,12 +174,12 @@ export default function NewSessionPage() {
   if (!child) return null;
 
   return (
-    <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+    <main className="rise-page min-h-screen animate-rise-page">
       <TopNav />
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold text-[#1b1b23]">Quick Session Log</h1>
-          <p className="mt-2 text-lg text-[#464554]">Log session details and performance metrics for today's lesson.</p>
+          <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Quick Session Log</h1>
+          <p className="mt-2 text-lg text-[var(--rise-text-muted)]">Log session details and performance metrics for today's lesson.</p>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-12">

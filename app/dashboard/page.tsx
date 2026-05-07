@@ -64,13 +64,13 @@ export default function DashboardPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <section className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold text-[#1b1b23]">Welcome back</h1>
-              <p className="mt-2 text-lg text-[#464554]">Your RISE tutoring workspace is ready for today's sessions.</p>
+              <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Welcome back</h1>
+              <p className="mt-2 text-lg text-[var(--rise-text-muted)]">Your RISE tutoring workspace is ready for today's sessions.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/reports">
@@ -88,11 +88,11 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="mb-8 rounded-2xl border border-[#c7c4d7] bg-white p-6 shadow-sm">
+          <section className="mb-8 rise-panel rounded-2xl p-6">
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#1b1b23]">Dashboard Insights</h2>
-                <p className="mt-1 text-sm text-[#464554]">A quick pulse check across saved students, sessions and reports.</p>
+                <h2 className="text-xl font-semibold text-[var(--rise-heading)]">Dashboard Insights</h2>
+                <p className="mt-1 text-sm text-[var(--rise-text-muted)]">A quick pulse check across saved students, sessions and reports.</p>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-5">
@@ -111,62 +111,62 @@ export default function DashboardPage() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="group rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:bg-white focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e1e0ff]"
+                  className="group rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--rise-purple)] hover:bg-[var(--rise-surface)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(90,79,240,0.18)]"
                 >
-                  <item.icon className="mb-3 h-5 w-5 text-[#4648d4] transition group-hover:scale-105" />
-                  <p className="text-xs font-bold uppercase text-[#767586]">{item.label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-[#1b1b23]">{item.value}</p>
+                  <item.icon className="mb-3 h-5 w-5 text-[var(--rise-purple)] transition group-hover:scale-105" />
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">{item.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--rise-heading)]">{item.value}</p>
                 </Link>
               ))}
             </div>
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
-                <h3 className="text-sm font-bold uppercase text-[#767586]">Today / Upcoming</h3>
+              <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-bg-elevated)] p-4">
+                <h3 className="text-sm font-bold uppercase text-[var(--rise-text-soft)]">Today / Upcoming</h3>
                 <div className="mt-3 space-y-3">
                   {upcomingSessions.length ? upcomingSessions.map((session) => (
-                    <Link key={session.id} href={`/students/${session.childId}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
-                      <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
-                      <p className="text-sm text-[#464554]">{new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(session.sessionDate))}</p>
+                    <Link key={session.id} href={`/students/${session.childId}`} className="block rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-3 transition hover:-translate-y-0.5 hover:border-[var(--rise-purple)] hover:shadow-sm">
+                      <p className="text-sm font-semibold text-[var(--rise-heading)]">{session.topic}</p>
+                      <p className="text-sm text-[var(--rise-text-muted)]">{new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(session.sessionDate))}</p>
                     </Link>
-                  )) : <p className="text-sm text-[#464554]">No upcoming sessions yet.</p>}
+                  )) : <p className="text-sm text-[var(--rise-text-muted)]">No upcoming sessions yet.</p>}
                 </div>
               </div>
-              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
-                <h3 className="text-sm font-bold uppercase text-[#767586]">Recent sessions</h3>
+              <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-bg-elevated)] p-4">
+                <h3 className="text-sm font-bold uppercase text-[var(--rise-text-soft)]">Recent sessions</h3>
                 <div className="mt-3 space-y-3">
                   {recentSessions.length ? recentSessions.map((session) => (
-                    <Link key={session.id} href={`/sessions/new/${session.childId}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
-                      <p className="text-sm font-semibold text-[#1b1b23]">{session.topic}</p>
-                      <p className="text-sm text-[#464554]">{session.quickNotes}</p>
+                    <Link key={session.id} href={`/sessions/new/${session.childId}`} className="block rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-3 transition hover:-translate-y-0.5 hover:border-[var(--rise-purple)] hover:shadow-sm">
+                      <p className="text-sm font-semibold text-[var(--rise-heading)]">{session.topic}</p>
+                      <p className="text-sm text-[var(--rise-text-muted)]">{session.quickNotes}</p>
                     </Link>
-                  )) : <p className="text-sm text-[#464554]">No sessions logged yet.</p>}
+                  )) : <p className="text-sm text-[var(--rise-text-muted)]">No sessions logged yet.</p>}
                 </div>
               </div>
-              <div className="rounded-xl border border-[#e9e6f3] bg-[#fcf8ff] p-4">
-                <h3 className="text-sm font-bold uppercase text-[#767586]">Recent reports</h3>
+              <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-bg-elevated)] p-4">
+                <h3 className="text-sm font-bold uppercase text-[var(--rise-text-soft)]">Recent reports</h3>
                 <div className="mt-3 space-y-3">
                   {recentReports.length ? recentReports.map((report) => (
-                    <Link key={report.id} href={`/reports/${report.id}`} className="block rounded-xl border border-[#e9e6f3] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[#4648d4] hover:shadow-sm">
-                      <p className="text-sm font-semibold text-[#1b1b23]">{report.title}</p>
-                      <p className="text-sm text-[#464554]">{report.sent_status || "draft"}</p>
+                    <Link key={report.id} href={`/reports/${report.id}`} className="block rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-3 transition hover:-translate-y-0.5 hover:border-[var(--rise-purple)] hover:shadow-sm">
+                      <p className="text-sm font-semibold text-[var(--rise-heading)]">{report.title}</p>
+                      <p className="text-sm text-[var(--rise-text-muted)]">{report.sent_status || "draft"}</p>
                     </Link>
-                  )) : <p className="text-sm text-[#464554]">No reports generated yet.</p>}
+                  )) : <p className="text-sm text-[var(--rise-text-muted)]">No reports generated yet.</p>}
                 </div>
               </div>
             </div>
           </section>
 
           <div className="relative mb-8 max-w-md">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#767586]" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--rise-text-soft)]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search child profiles..."
-              className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white pl-12 pr-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+              className="rise-input h-12 w-full pl-12 pr-4"
             />
           </div>
 
-          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+          {status ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
 
           {filteredStudents.length ? (
             <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -196,9 +196,9 @@ export default function DashboardPage() {
             </section>
           ) : (
             <Card className="text-center">
-              <UsersRound className="mx-auto h-10 w-10 text-[#767586]" />
-              <h2 className="mt-4 text-xl font-semibold text-[#1b1b23]">No students yet</h2>
-              <p className="mt-2 text-[#464554]">Create your first child profile to start logging sessions and reports.</p>
+              <UsersRound className="mx-auto h-10 w-10 text-[var(--rise-text-soft)]" />
+              <h2 className="mt-4 text-xl font-semibold text-[var(--rise-heading)]">No students yet</h2>
+              <p className="mt-2 text-[var(--rise-text-muted)]">Create your first child profile to start logging sessions and reports.</p>
               <Link href="/students/new" className="mt-5 inline-block">
                 <BrandButton>Create Child Profile</BrandButton>
               </Link>

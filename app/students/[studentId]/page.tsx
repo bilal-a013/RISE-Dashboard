@@ -52,10 +52,10 @@ export default function StudentOverviewPage() {
   if (!student) {
     return (
       <ProtectedContent>
-        <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+        <main className="rise-page min-h-screen animate-rise-page">
           <TopNav />
           <div className="mx-auto max-w-7xl px-6 py-10">
-            <p className="rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p>
+            <p className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p>
           </div>
           <Footer />
         </main>
@@ -65,14 +65,14 @@ export default function StudentOverviewPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest text-[#4648d4]">Student overview</p>
-              <h1 className="mt-2 text-3xl font-semibold text-[#1b1b23]">{student.fullName}</h1>
-              <p className="mt-2 text-lg text-[#464554]">
+              <p className="text-sm font-bold uppercase tracking-widest text-[var(--rise-purple)]">Student overview</p>
+              <h1 className="mt-2 text-3xl font-semibold text-[var(--rise-heading)]">{student.fullName}</h1>
+              <p className="mt-2 text-lg text-[var(--rise-text-muted)]">
                 {student.educationStage || "Education stage not set"} · {student.yearGroup}
               </p>
             </div>
@@ -98,7 +98,7 @@ export default function StudentOverviewPage() {
             </div>
           </header>
 
-          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+          {status ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
 
           <section className="mb-8 grid gap-6 lg:grid-cols-12">
             <Card className="flex flex-col gap-5 lg:col-span-8">

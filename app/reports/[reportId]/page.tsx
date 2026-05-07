@@ -214,10 +214,10 @@ export default function ReportPage() {
   if (!data) {
     return (
       <ProtectedContent>
-        <main className="min-h-screen bg-[#fcf8ff]">
+        <main className="rise-page min-h-screen">
           <TopNav />
           <div className="mx-auto max-w-7xl px-6 py-10">
-            <p className="rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p>
+            <p className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p>
           </div>
           <Footer />
         </main>
@@ -238,13 +238,13 @@ export default function ReportPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
         <div className="report-print-root mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between print:hidden">
           <div>
-            <h1 className="text-3xl font-semibold text-[#1b1b23]">Parent Session Report</h1>
-            <p className="mt-2 text-lg text-[#464554]">Reviewing progress for {date} Session</p>
+            <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Parent Session Report</h1>
+            <p className="mt-2 text-lg text-[var(--rise-text-muted)]">Reviewing progress for {date} Session</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <BrandButton variant="secondary" onClick={() => window.print()}>

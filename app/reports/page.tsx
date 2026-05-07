@@ -67,12 +67,12 @@ export default function ReportsPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
         <div className="mx-auto max-w-7xl px-6 py-10">
           <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-[#1b1b23]">Reports</h1>
-            <p className="mt-2 text-lg text-[#464554]">Review parent reports and quickly load a student by Tutor Key.</p>
+            <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Reports</h1>
+            <p className="mt-2 text-lg text-[var(--rise-text-muted)]">Review parent reports and quickly load a student by Tutor Key.</p>
           </header>
 
           <section className="mb-8 grid gap-6 lg:grid-cols-12">
@@ -120,7 +120,7 @@ export default function ReportsPage() {
             </Card>
           </section>
 
-          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+          {status ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
 
           <section>
             <div className="mb-4 flex items-center justify-between gap-4">
@@ -180,9 +180,9 @@ export default function ReportsPage() {
               </div>
             ) : (
               <Card className="text-center">
-                <Mail className="mx-auto h-10 w-10 text-[#767586]" />
-                <h2 className="mt-4 text-xl font-semibold text-[#1b1b23]">No reports yet</h2>
-                <p className="mt-2 text-[#464554]">Generate a parent report from a saved session and it will appear here.</p>
+                <Mail className="mx-auto h-10 w-10 text-[var(--rise-text-soft)]" />
+                <h2 className="mt-4 text-xl font-semibold text-[var(--rise-heading)]">No reports yet</h2>
+                <p className="mt-2 text-[var(--rise-text-muted)]">Generate a parent report from a saved session and it will appear here.</p>
               </Card>
             )}
           </section>
