@@ -319,6 +319,15 @@ export async function insertSession(session: SessionLog, child: ChildProfile) {
     struggles: child.struggles ?? [],
     homework: session.homeworkDetails || null,
     next_steps: session.specificNextFocus || session.nextLessonFocus.join(", ") || null,
+    understanding_level: session.understandingToday,
+    effort_rating: session.effortEngagement,
+    confidence_rating: session.confidenceRating,
+    session_focus: session.sessionFocus,
+    key_skill: session.keySkillWorkedOn,
+    report_tone: session.reportTone,
+    include_in_report: Object.entries(session.includeInReport)
+      .filter(([, included]) => included)
+      .map(([key]) => key),
   };
 
   const { data, error } = await client.from("sessions").upsert(row, { onConflict: "id" }).select("*").single();
@@ -343,6 +352,15 @@ export async function updateSession(session: SessionLog, child: ChildProfile) {
     struggles: child.struggles ?? [],
     homework: session.homeworkDetails || null,
     next_steps: session.specificNextFocus || session.nextLessonFocus.join(", ") || null,
+    understanding_level: session.understandingToday,
+    effort_rating: session.effortEngagement,
+    confidence_rating: session.confidenceRating,
+    session_focus: session.sessionFocus,
+    key_skill: session.keySkillWorkedOn,
+    report_tone: session.reportTone,
+    include_in_report: Object.entries(session.includeInReport)
+      .filter(([, included]) => included)
+      .map(([key]) => key),
   };
 
   const { data, error } = await client
@@ -385,6 +403,30 @@ function parseStoredReportBody(body: string | null) {
   }
 }
 
+function parsePlainReportBody(body: string | null): ReportSections | null {
+  if (!body) return null;
+  const lines = body.split(/\r?\n/);
+  const sectionValue = (label: string) => {
+    const prefix = `${label}:`;
+    const line = lines.find((item) => item.toLowerCase().startsWith(prefix.toLowerCase()));
+    return line ? line.slice(prefix.length).trim() : undefined;
+  };
+  const title = lines.find((line) => line.trim())?.trim();
+  const whatWentWell = sectionValue("What went well")?.split(/\s+[•-]\s+|\s+\u2022\s+/).filter(Boolean).join("\n");
+  const sections: ReportSections = {
+    title,
+    priorityTag: sectionValue("Priority"),
+    todayFocus: sectionValue("Today's focus"),
+    whatWentWell,
+    stillNeedsSupport: sectionValue("Still needs support"),
+    confidence: sectionValue("Confidence"),
+    homework: sectionValue("Homework"),
+    nextFocus: sectionValue("Next focus"),
+    tutorSummary: sectionValue("Tutor summary"),
+  };
+  return Object.values(sections).some(Boolean) ? sections : null;
+}
+
 function reportRowToSections(row: ReportRow) {
   if (row.report_sections && typeof row.report_sections === "object") {
     return row.report_sections;
@@ -399,7 +441,7 @@ function reportRowToSections(row: ReportRow) {
     return reportSectionsFromParentReport(parsed.parentReport);
   }
 
-  return null;
+  return parsePlainReportBody(row.body);
 }
 
 export async function insertReport(report: ParentReport, session: SessionLog, child: ChildProfile) {
@@ -409,6 +451,7 @@ export async function insertReport(report: ParentReport, session: SessionLog, ch
   const reportSections = reportSectionsFromParentReport(report, {
     sentStatus: "draft",
     sentTo: child.parentEmail || undefined,
+    reportTone: session.reportTone,
   });
   const row = {
     id: reportId,
@@ -481,7 +524,29 @@ export async function listReports(studentId?: string) {
   }
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as Array<ReportRow & { students?: { full_name?: string; parent_email?: string; tutor_key?: string }; sessions?: { subject?: string; topic?: string; session_date?: string } }>;
+  return sortReportsNewestFirst(
+    (data ?? []) as Array<ReportRow & { students?: { full_name?: string; parent_email?: string; tutor_key?: string }; sessions?: { subject?: string; topic?: string; session_date?: string } }>
+  );
+}
+
+function reportSortTime(
+  report: ReportRow & {
+    sessions?: { session_date?: string | null };
+  }
+) {
+  const bestDate = report.created_at || report.sessions?.session_date || "";
+  const time = bestDate ? new Date(bestDate).getTime() : 0;
+  return Number.isFinite(time) ? time : 0;
+}
+
+function sortReportsNewestFirst<T extends ReportRow & { sessions?: { session_date?: string | null } }>(reports: T[]) {
+  return reports
+    .map((report, index) => ({ report, index }))
+    .sort((a, b) => {
+      const dateDiff = reportSortTime(b.report) - reportSortTime(a.report);
+      return dateDiff || a.index - b.index;
+    })
+    .map(({ report }) => report);
 }
 
 export async function getReportBundle(reportId: string) {

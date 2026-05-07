@@ -20,6 +20,7 @@ html.dark {
   --rise-text: #1f2230;
   --rise-heading: #171927;
   --rise-text-muted: #616579;
+  --rise-text-soft: #7d8193;
   --rise-purple: #5a4ff0;
   --rise-purple-2: #9a35e8;
   --rise-purple-soft: #ece7ff;
@@ -42,6 +43,7 @@ html.dark {
   --rise-text: #eef2fb;
   --rise-heading: #ffffff;
   --rise-text-muted: #b4bfd3;
+  --rise-text-soft: #8f9bb2;
   --rise-purple: #8b7cf6;
   --rise-purple-2: #bc68ff;
   --rise-purple-soft: rgba(139, 124, 246, 0.18);

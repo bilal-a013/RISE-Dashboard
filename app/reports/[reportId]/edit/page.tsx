@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { ProtectedContent } from "../../../../components/rise/AuthProvider";
@@ -61,6 +61,24 @@ export default function EditReportPage() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   const isDev = process.env.NODE_ENV !== "production";
+  const previewReport = useMemo(() => {
+    if (!bundle?.session) return null;
+    const sections: ReportSections = {
+      title,
+      sentStatus,
+      sentTo,
+      priorityTag,
+      reportTone: bundle.reportSections?.reportTone || bundle.session.reportTone,
+      todayFocus,
+      whatWentWell,
+      stillNeedsSupport,
+      confidence,
+      homework,
+      nextFocus,
+      tutorSummary,
+    };
+    return reportSectionsToParentReport(bundle.child, bundle.session, sections, bundle.parentReport ?? undefined);
+  }, [bundle, confidence, homework, nextFocus, priorityTag, sentStatus, sentTo, stillNeedsSupport, title, todayFocus, tutorSummary, whatWentWell]);
 
   useEffect(() => {
     getReportBundle(params.reportId)
@@ -99,6 +117,7 @@ export default function EditReportPage() {
         sentStatus,
         sentTo: sentTo.trim() || undefined,
         priorityTag,
+        reportTone: bundle.reportSections?.reportTone || bundle.session.reportTone,
         todayFocus: todayFocus.trim(),
         whatWentWell: whatWentWell.trim(),
         stillNeedsSupport: stillNeedsSupport.trim(),
@@ -120,7 +139,7 @@ export default function EditReportPage() {
         sent_at: sentStatus === "sent" ? bundle.reportRow.sent_at || new Date().toISOString() : null,
       });
 
-      toast({ title: "Report updated successfully", description: "The structured report was saved to Supabase.", variant: "success" });
+      toast({ title: "Report updated successfully.", description: "The structured report was saved to Supabase.", variant: "success" });
       router.push(`/reports/${params.reportId}`);
       router.refresh();
     } catch (error) {
@@ -136,7 +155,7 @@ export default function EditReportPage() {
     <ProtectedContent>
       <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
-        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
           <header className="mb-6 sm:mb-8">
             <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Edit Report</h1>
             <p className="mt-2 text-base text-[var(--rise-text-muted)] sm:text-lg">
@@ -150,6 +169,38 @@ export default function EditReportPage() {
 
           {bundle ? (
             <div className="space-y-6">
+              <Card className="overflow-hidden p-0">
+                <div className="flex flex-col gap-4 border-b border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <img src="/rise-logo.png" alt="RISE Tutoring" className="h-14 w-14 rounded-2xl object-cover shadow-sm" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--rise-purple)]">Generated parent report workflow</p>
+                      <h2 className="mt-1 truncate text-2xl font-semibold text-[var(--rise-heading)]">{bundle.child.fullName}</h2>
+                      <p className="mt-1 text-sm text-[var(--rise-text-muted)]">
+                        {new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(bundle.session.sessionDate))} / {bundle.session.topic}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="w-fit rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface)] px-3 py-1 text-xs font-bold uppercase text-[var(--rise-purple)]">
+                    {sentStatus}
+                  </span>
+                </div>
+                <div className="grid gap-4 p-5 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--rise-text-soft)]">Session</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--rise-heading)]">{bundle.session.topic}</p>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--rise-text-soft)]">Parent email</p>
+                    <p className="mt-2 break-words text-sm font-semibold text-[var(--rise-heading)]">{sentTo || "Not set"}</p>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--rise-text-soft)]">Tone</p>
+                    <p className="mt-2 text-sm font-semibold capitalize text-[var(--rise-heading)]">{bundle.reportSections?.reportTone || bundle.session.reportTone || "balanced"}</p>
+                  </div>
+                </div>
+              </Card>
+
               <Card className="space-y-4 p-5 sm:p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="space-y-2">
@@ -233,6 +284,39 @@ export default function EditReportPage() {
                   </label>
                 </div>
               </Card>
+
+              {previewReport ? (
+                <Card className="space-y-4 p-5 sm:p-6">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--rise-purple)]">Live parent preview</p>
+                      <h2 className="mt-1 text-xl font-semibold text-[var(--rise-heading)]">{previewReport.title}</h2>
+                    </div>
+                    <span className="w-fit rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-3 py-1 text-xs font-bold text-[var(--rise-text-muted)]">
+                      Updates as you edit
+                    </span>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {[
+                      ["Today's focus", previewReport.todayFocus],
+                      ["What went well", previewReport.whatWentWell.join(" / ")],
+                      ["Still needs support", previewReport.stillNeedsSupport],
+                      ["Confidence", previewReport.confidenceUnderstanding],
+                      ["Homework", previewReport.homeworkAssigned],
+                      ["Next focus", previewReport.nextSessionFocus],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--rise-purple)]">{label}</p>
+                        <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{value}</p>
+                      </div>
+                    ))}
+                    <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 md:col-span-2">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--rise-purple)]">Tutor summary</p>
+                      <p className="mt-2 text-sm italic leading-6 text-[var(--rise-heading)]">{previewReport.tutorSummary}</p>
+                    </div>
+                  </div>
+                </Card>
+              ) : null}
 
               <Card className="space-y-3 p-5 sm:p-6">
                 <div className="grid gap-4 md:grid-cols-2">

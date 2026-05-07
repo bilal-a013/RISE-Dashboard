@@ -339,6 +339,9 @@ export default function NewSessionPage() {
                     { value: "detailed", label: "Detailed" },
                   ]}
                 />
+                <p className="mt-2 text-xs leading-5 text-[var(--rise-text-muted)]">
+                  Tone adjusts the wording of the generated parent report.
+                </p>
               </div>
               <div>
                 <p className="mb-3 text-xs font-bold uppercase text-[#767586]">Include in parent report</p>

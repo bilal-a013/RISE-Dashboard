@@ -77,6 +77,7 @@ export default function LoginPage() {
       <section className="flex flex-1 items-center justify-center px-6 py-16">
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">
+            <img src="/rise-logo.png" alt="RISE Tutoring" className="mx-auto mb-4 h-20 w-20 rounded-3xl object-cover shadow-lg" />
             <h1 className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] bg-clip-text text-3xl font-extrabold text-transparent">
               RISE Tutoring
             </h1>

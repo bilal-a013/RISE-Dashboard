@@ -15,9 +15,14 @@ export default function IntegrationsSettingsPage() {
         <TopNav />
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
           <header className="mb-6 sm:mb-8">
-            <p className="text-sm font-bold uppercase tracking-widest text-[var(--rise-purple)]">Settings</p>
-            <h1 className="mt-2 text-3xl font-semibold text-[var(--rise-heading)]">Integrations</h1>
-            <p className="mt-2 text-base text-[var(--rise-text-muted)] sm:text-lg">Prepare RISE Dashboard for Gmail and other future integrations.</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <img src="/rise-logo.png" alt="RISE Tutoring" className="h-16 w-16 rounded-2xl object-cover shadow-sm" />
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest text-[var(--rise-purple)]">Settings</p>
+                <h1 className="mt-2 text-3xl font-semibold text-[var(--rise-heading)]">Integrations</h1>
+                <p className="mt-2 text-base text-[var(--rise-text-muted)] sm:text-lg">Prepare RISE Dashboard for Gmail and other future integrations.</p>
+              </div>
+            </div>
           </header>
 
           <div className="grid gap-6 lg:grid-cols-3">

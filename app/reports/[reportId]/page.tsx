@@ -12,7 +12,7 @@ import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
 import { useToast } from "../../../components/rise/ToastProvider";
-import { generateParentReport } from "../../../lib/reportGenerator";
+import { generateParentReport, parentUpdateOpeners } from "../../../lib/reportGenerator";
 import { deleteReport, getReportBundle, markReportSent } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
 import type { ChildProfile, ParentReport, SessionLog } from "../../../types/rise";
@@ -25,10 +25,11 @@ function priorityLabel(session?: SessionLog) {
 }
 
 function buildPlainEmail(child: ChildProfile, session: SessionLog, report: ParentReport, reportDate: string) {
+  const parentOpening = parentUpdateOpeners[session.reportTone || "balanced"];
   return [
     `Hi ${child.parentName},`,
     "",
-    `Here is ${child.fullName}'s latest tutoring update from today's session (${reportDate}).`,
+    `${parentOpening} (${reportDate})`,
     "",
     `Today's Focus: ${report.todayFocus}`,
     `What Went Well: ${report.whatWentWell.join(" • ")}`,
@@ -46,6 +47,7 @@ function buildPlainEmail(child: ChildProfile, session: SessionLog, report: Paren
 }
 
 function buildStyledEmail(child: ChildProfile, session: SessionLog, report: ParentReport, reportDate: string) {
+  const parentOpening = parentUpdateOpeners[session.reportTone || "balanced"];
   const cards = [
     ["Today's Focus", report.todayFocus],
     ["What Went Well", report.whatWentWell.join(" • ")],
@@ -61,13 +63,19 @@ function buildStyledEmail(child: ChildProfile, session: SessionLog, report: Pare
       <div style="max-width:640px; margin:0 auto; padding:18px 12px;">
         <div style="background:#ffffff; border:1px solid #c7c4d7; border-radius:24px; overflow:hidden; box-shadow:0 10px 30px rgba(70,72,212,.08);">
           <div style="background:linear-gradient(135deg,#4648d4 0%,#8127cf 100%); color:#ffffff; padding:22px 24px;">
-            <div style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; opacity:.82;">RISE Tutoring</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="/rise-logo.png" alt="RISE Tutoring" style="width:42px; height:42px; border-radius:12px; border:1px solid rgba(255,255,255,.28);" />
+              <div>
+                <div style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; opacity:.82;">RISE Tutoring</div>
+                <div style="font-size:13px; opacity:.9; margin-top:2px;">Parent Session Report</div>
+              </div>
+            </div>
             <div style="font-size:24px; font-weight:700; line-height:1.2; margin-top:6px;">${child.fullName}</div>
             <div style="font-size:14px; opacity:.9; margin-top:6px;">${reportDate} · ${session.topic}</div>
           </div>
           <div style="padding:22px 24px;">
             <p style="margin:0 0 14px; font-size:15px; line-height:1.6;">Hi ${child.parentName},</p>
-            <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">Here is ${child.fullName}'s latest tutoring update from today's session.</p>
+            <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">${parentOpening}</p>
             <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
               <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; color:#4648d4;">${child.subjects.join(' / ')}</div>
               <div style="border:1px solid #e9e6f3; background:#f5f2fe; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; color:#4648d4;">${child.currentWorkingLevel} → ${child.targetLevel}</div>
@@ -158,6 +166,7 @@ export default function ReportPage() {
   const emailSubject = data ? `RISE Tutoring Report - ${data.child.fullName} - ${reportDate}` : "";
   const emailText = data ? buildPlainEmail(data.child, data.session, data.report, reportDate) : "";
   const emailHtml = data ? buildStyledEmail(data.child, data.session, data.report, reportDate) : "";
+  const parentOpening = data ? parentUpdateOpeners[data.session.reportTone || "balanced"] : "";
   const emailCards = data
     ? [
         { label: "Today's Focus", value: data.report.todayFocus, span: "md:col-span-2" },
@@ -289,29 +298,37 @@ export default function ReportPage() {
 
         <section className="grid gap-6 md:grid-cols-12 print:gap-2 print-page-compact print-grid">
           <div className="md:col-span-8 print:col-span-2">
-            <Card className="report-print-card flex flex-col items-center gap-5 md:flex-row md:text-left print:p-2">
-              <div className="relative flex h-24 w-24 flex-none items-center justify-center rounded-2xl bg-[#e1e0ff] text-3xl font-black text-[#4648d4] print:hidden">
-                {initialsFromName(child.fullName)}
-                <span className="absolute -bottom-2 -right-2 rounded-lg border-2 border-white bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-2 py-1 text-[10px] font-bold text-white">
-                  RISE BADGE
-                </span>
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <span className="text-xs font-bold uppercase tracking-wide text-[#4648d4]">Student Profile</span>
-                <h2 className="mt-1 text-3xl font-semibold print:mt-0 print:text-[18px]">{child.fullName}</h2>
-                <div className="mt-3 flex flex-wrap justify-center gap-2 md:justify-start print:mt-2 print:gap-1.5">
-                  <span className="rounded-full bg-[#e9e6f3] px-4 py-2 text-sm font-semibold text-[#464554] print:px-3 print:py-1 print:text-[10px]">
-                    {child.subjects.join(" / ")} · {child.yearGroup}
-                  </span>
-                  <span className="rounded-full bg-[#f0dbff] px-4 py-2 text-sm font-semibold text-[#6900b3] print:px-3 print:py-1 print:text-[10px]">60 Min Session</span>
+            <Card className="report-print-card overflow-hidden p-0 md:flex md:items-stretch print:p-0">
+              <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center print:p-2">
+              <div className="flex items-center gap-3">
+                <img src="/rise-logo.png" alt="RISE Tutoring" className="h-14 w-14 rounded-2xl border border-white/40 object-cover shadow-sm print:h-10 print:w-10" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] text-xl font-black text-[var(--rise-purple)] print:hidden">
+                  {initialsFromName(child.fullName)}
                 </div>
               </div>
-              <div className="w-full md:w-48 print:hidden">
-                <p className="mb-2 text-sm font-semibold text-[#464554] print:mb-1 print:text-[10px]">Overall Progress Indicator</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--rise-purple)]">Parent Session Report</span>
+                  <span className="rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-2.5 py-1 text-[10px] font-bold uppercase text-[var(--rise-text-muted)] print:px-2 print:py-0.5">
+                    {session.reportTone || "balanced"}
+                  </span>
+                </div>
+                <h2 className="mt-1 break-words text-3xl font-semibold text-[var(--rise-heading)] print:mt-0 print:text-[18px]">{child.fullName}</h2>
+                <div className="mt-3 flex flex-wrap gap-2 print:mt-2 print:gap-1.5">
+                  <span className="rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-3 py-1.5 text-sm font-semibold text-[var(--rise-text-muted)] print:px-2 print:py-0.5 print:text-[10px]">
+                    {child.subjects.join(" / ")} · {child.yearGroup}
+                  </span>
+                  <span className="rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface)] px-3 py-1.5 text-sm font-semibold text-[var(--rise-text-muted)] print:px-2 print:py-0.5 print:text-[10px]">60 min session</span>
+                  <span className="rounded-full border border-[var(--rise-border)] bg-[var(--rise-surface)] px-3 py-1.5 text-sm font-semibold text-[var(--rise-text-muted)] print:px-2 print:py-0.5 print:text-[10px]">{date}</span>
+                </div>
+              </div>
+              </div>
+              <div className="border-t border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-5 md:w-56 md:border-l md:border-t-0 print:p-2">
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--rise-text-soft)] print:mb-1 print:text-[9px]">Overall progress</p>
                 <ProgressSegments value={session.progressRating} />
                 <div className="mt-2 flex items-center justify-between print:mt-1">
-                  <span className="text-xl font-bold text-[#4648d4] print:text-[14px]">{session.progressRating}/5</span>
-                  <span className="text-sm italic text-[#464554] print:text-[10px]">{report.progressSnapshot.progressLabel}</span>
+                  <span className="text-xl font-bold text-[var(--rise-purple)] print:text-[14px]">{session.progressRating}/5</span>
+                  <span className="text-sm text-[var(--rise-text-muted)] print:text-[10px]">{report.progressSnapshot.progressLabel}</span>
                 </div>
               </div>
             </Card>
@@ -495,7 +512,13 @@ export default function ReportPage() {
                         className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-5 py-4 text-white"
                         style={emailPreviewStyle}
                       >
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">RISE Tutoring</p>
+                        <div className="flex items-center gap-3">
+                          <img src="/rise-logo.png" alt="RISE Tutoring" className="h-10 w-10 rounded-xl border border-white/30 object-cover" />
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">RISE Tutoring</p>
+                            <p className="text-xs opacity-80">Parent Session Report</p>
+                          </div>
+                        </div>
                         <h4 className="mt-1 text-2xl font-semibold">{child.fullName}</h4>
                         <p className="text-sm opacity-90">
                           {reportDate} · {session.topic}
@@ -505,7 +528,7 @@ export default function ReportPage() {
                         <div className="rounded-2xl bg-[var(--rise-surface-soft)] p-4 md:col-span-2">
                           <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--rise-purple)]">Parent update</p>
                           <p className="mt-2 text-sm leading-6 text-[var(--rise-text)]">
-                            Here is {child.fullName}&apos;s latest tutoring update from today&apos;s session.
+                            {parentOpening}
                           </p>
                         </div>
                         {emailCards.map((item) => (

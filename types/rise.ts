@@ -115,6 +115,7 @@ export type ReportSections = {
   sentStatus?: string;
   sentTo?: string;
   priorityTag?: string;
+  reportTone?: ReportTone;
   todayFocus?: string;
   whatWentWell?: string;
   stillNeedsSupport?: string;

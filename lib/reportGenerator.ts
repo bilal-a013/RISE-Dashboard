@@ -23,6 +23,73 @@ const toneOpeners: Record<ReportTone, string> = {
   detailed: "A useful session with clear understanding and next steps.",
 };
 
+export const parentUpdateOpeners: Record<ReportTone, string> = {
+  balanced: "Here is a clear summary of today's tutoring session, including strengths and the next steps.",
+  encouraging: "Here is a positive update on today's session, with the progress made and the support that will help confidence keep growing.",
+  direct: "Here is today's tutoring update, with the main outcomes and the next action points.",
+  detailed: "Here is a fuller update on today's session, including what was covered, how the work developed, and the next focus.",
+};
+
+const toneTemplates: Record<
+  ReportTone,
+  {
+    positiveFallback: (name: string, skill: string) => string;
+    effortStrong: string;
+    effortSteady: string;
+    supportLots: string;
+    supportLight: string;
+    confidenceHigh: (name: string) => string;
+    confidenceSteady: (name: string) => string;
+    confidenceLow: (name: string) => string;
+    nextFocus: (nextFocus: string) => string;
+  }
+> = {
+  balanced: {
+    positiveFallback: (name, skill) => `${name} engaged well with ${skill.toLowerCase()}.`,
+    effortStrong: "Effort and engagement were strong.",
+    effortSteady: "Effort was steady.",
+    supportLots: "Core ideas still need guided practice.",
+    supportLight: "A short recap next time will help consolidate the learning.",
+    confidenceHigh: (name) => `${name} showed good confidence and could explain parts of the work.`,
+    confidenceSteady: (name) => `${name} showed steady confidence after examples were modelled.`,
+    confidenceLow: (name) => `${name} will benefit from smaller practice steps.`,
+    nextFocus: (nextFocus) => nextFocus,
+  },
+  encouraging: {
+    positiveFallback: (name, skill) => `${name} kept trying with ${skill.toLowerCase()} and showed encouraging progress as the session developed.`,
+    effortStrong: "Effort was strong, and the persistence shown today is a good sign for future sessions.",
+    effortSteady: "Effort was steady, with useful moments of focus to build from.",
+    supportLots: "Some core ideas still need reassurance and guided practice, but this is a manageable next step.",
+    supportLight: "A short confidence-building recap next time will help the learning feel more secure.",
+    confidenceHigh: (name) => `${name} showed growing confidence and was able to explain parts of the work with increasing independence.`,
+    confidenceSteady: (name) => `${name} showed steady confidence once examples were modelled, which gives us a good base to build on.`,
+    confidenceLow: (name) => `${name} will benefit from smaller practice steps and encouragement as the topic becomes more familiar.`,
+    nextFocus: (nextFocus) => `Build confidence with ${nextFocus.toLowerCase()}.`,
+  },
+  direct: {
+    positiveFallback: (name, skill) => `${name} worked on ${skill.toLowerCase()} and made progress.`,
+    effortStrong: "Effort was strong.",
+    effortSteady: "Effort was acceptable, with room for more consistent focus.",
+    supportLots: "Core ideas need more guided practice.",
+    supportLight: "A short recap is needed before moving on.",
+    confidenceHigh: (name) => `${name} showed good confidence and explained parts of the work independently.`,
+    confidenceSteady: (name) => `${name} showed steady confidence after modelling.`,
+    confidenceLow: (name) => `${name} needs smaller practice steps before working independently.`,
+    nextFocus: (nextFocus) => `Next action: ${nextFocus}.`,
+  },
+  detailed: {
+    positiveFallback: (name, skill) => `${name} worked through ${skill.toLowerCase()} and began connecting the method to the wider topic.`,
+    effortStrong: "Effort and engagement were strong, especially when applying the method after examples.",
+    effortSteady: "Effort was steady, with the best progress coming after guided modelling and repetition.",
+    supportLots: "Core ideas still need guided practice, particularly when the question changes format.",
+    supportLight: "A short recap next time will help consolidate the learning before extending the topic.",
+    confidenceHigh: (name) => `${name} showed good confidence and could explain parts of the work, especially after checking the method against examples.`,
+    confidenceSteady: (name) => `${name} showed steady confidence after examples were modelled and benefited from seeing each step clearly.`,
+    confidenceLow: (name) => `${name} will benefit from smaller practice steps, repeated examples, and quick checks for understanding.`,
+    nextFocus: (nextFocus) => `Next session should focus on ${nextFocus.toLowerCase()}, with time for examples, independent practice, and a short review.`,
+  },
+};
+
 function splitSentences(notes: string) {
   return notes
     .split(/(?<=[.!?])\s+|\n+/)
@@ -74,6 +141,7 @@ export function reportSectionsFromParentReport(
     sentStatus?: string;
     sentTo?: string;
     priorityTag?: string;
+    reportTone?: ReportTone;
   }
 ): ReportSections {
   return {
@@ -81,6 +149,7 @@ export function reportSectionsFromParentReport(
     sentStatus: options?.sentStatus,
     sentTo: options?.sentTo,
     priorityTag: options?.priorityTag,
+    reportTone: options?.reportTone,
     todayFocus: report.todayFocus,
     whatWentWell: report.whatWentWell.join("\n"),
     stillNeedsSupport: report.stillNeedsSupport,
@@ -154,7 +223,10 @@ export function generateParentReport(
   const previous = previousSessions.find((item) => item.id !== session.id);
   const progressLabel = progressLabels[session.progressRating];
   const confidenceLabel = confidenceLabels[session.confidenceRating];
-  const nextFocus = session.specificNextFocus || formatList(session.nextLessonFocus);
+  const tone = session.reportTone || "balanced";
+  const template = toneTemplates[tone];
+  const nextFocusBase = session.specificNextFocus || formatList(session.nextLessonFocus);
+  const nextFocus = template.nextFocus(nextFocusBase);
   const homework =
     session.homeworkDetails ||
     (session.homeworkStatus === "not-set"
@@ -162,22 +234,22 @@ export function generateParentReport(
       : "Homework was set to consolidate today's focus.");
 
   const whatWentWell = [
-    positiveNote || `${child.preferredName || child.fullName} engaged well with ${session.keySkillWorkedOn.toLowerCase()}.`,
-    session.effortEngagement >= 4 ? "Effort and engagement were strong." : "Effort was steady.",
+    positiveNote || template.positiveFallback(child.preferredName || child.fullName, session.keySkillWorkedOn),
+    session.effortEngagement >= 4 ? template.effortStrong : template.effortSteady,
   ];
 
   const stillNeedsSupport =
     supportNote ||
     (session.understandingToday === "lots-of-help"
-      ? "Core ideas still need guided practice."
-      : "A short recap next time will help consolidate the learning.");
+      ? template.supportLots
+      : template.supportLight);
 
   const confidenceUnderstanding =
     session.confidenceRating >= 4
-      ? `${child.preferredName || child.fullName} showed good confidence and could explain parts of the work.`
+      ? template.confidenceHigh(child.preferredName || child.fullName)
       : session.confidenceRating === 3
-        ? `${child.preferredName || child.fullName} showed steady confidence after examples were modelled.`
-        : `${child.preferredName || child.fullName} will benefit from smaller practice steps.`;
+        ? template.confidenceSteady(child.preferredName || child.fullName)
+        : template.confidenceLow(child.preferredName || child.fullName);
 
   return {
     id: crypto.randomUUID(),
@@ -201,7 +273,7 @@ export function generateParentReport(
         ? `Compared with ${previous.topic}, this session showed ${session.progressRating >= previous.progressRating ? "stronger momentum" : "a need for more consolidation"}.`
         : "This is the first stored comparison point for this child.",
     },
-    tutorSummary: `${toneOpeners[session.reportTone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}. Next: ${nextFocus.toLowerCase()}.`,
+    tutorSummary: `${toneOpeners[tone]} ${child.preferredName || child.fullName} is working towards ${child.targetLevel}. Next: ${nextFocus.toLowerCase()}.`,
     generatedAt: new Date().toISOString(),
   };
 }
