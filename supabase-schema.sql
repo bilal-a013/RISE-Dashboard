@@ -255,3 +255,208 @@ drop trigger if exists set_students_updated_at on students;
 create trigger set_students_updated_at
 before update on students
 for each row execute function set_updated_at();
+
+create table if not exists child_profiles (
+  id uuid primary key default gen_random_uuid(),
+  tutor_id uuid references auth.users(id) on delete cascade,
+  full_name text,
+  year_group text,
+  age_range text,
+  working_level text,
+  target_grade text,
+  preferred_subject text default 'maths',
+  active boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create table if not exists tutor_keys (
+  id uuid primary key default gen_random_uuid(),
+  child_profile_id uuid not null references child_profiles(id) on delete cascade,
+  key_hash text unique not null,
+  key_display text,
+  status text default 'active',
+  last_used_at timestamp with time zone,
+  revoked_at timestamp with time zone,
+  created_at timestamp with time zone default now()
+);
+
+alter table child_profiles add column if not exists tutor_id uuid references auth.users(id) on delete cascade;
+alter table child_profiles add column if not exists full_name text;
+alter table child_profiles add column if not exists year_group text;
+alter table child_profiles add column if not exists age_range text;
+alter table child_profiles add column if not exists working_level text;
+alter table child_profiles add column if not exists target_grade text;
+alter table child_profiles add column if not exists preferred_subject text default 'maths';
+alter table child_profiles add column if not exists active boolean default true;
+alter table child_profiles add column if not exists created_at timestamp with time zone default now();
+alter table child_profiles add column if not exists updated_at timestamp with time zone default now();
+
+alter table tutor_keys add column if not exists child_profile_id uuid references child_profiles(id) on delete cascade;
+alter table tutor_keys add column if not exists key_hash text;
+alter table tutor_keys add column if not exists key_display text;
+alter table tutor_keys add column if not exists status text default 'active';
+alter table tutor_keys add column if not exists last_used_at timestamp with time zone;
+alter table tutor_keys add column if not exists revoked_at timestamp with time zone;
+alter table tutor_keys add column if not exists created_at timestamp with time zone default now();
+
+alter table child_profiles enable row level security;
+alter table tutor_keys enable row level security;
+
+create unique index if not exists tutor_keys_key_hash_unique_idx on tutor_keys(key_hash);
+create index if not exists tutor_keys_child_profile_id_idx on tutor_keys(child_profile_id);
+create unique index if not exists tutor_keys_one_current_per_child_idx on tutor_keys(child_profile_id) where revoked_at is null;
+create index if not exists child_profiles_tutor_id_idx on child_profiles(tutor_id);
+
+grant select, insert, update, delete on child_profiles to authenticated;
+grant select, insert, update, delete on tutor_keys to authenticated;
+
+drop policy if exists "Tutors can read own child profiles" on child_profiles;
+create policy "Tutors can read own child profiles"
+on child_profiles for select
+using (tutor_id = auth.uid());
+
+drop policy if exists "Tutors can insert own child profiles" on child_profiles;
+create policy "Tutors can insert own child profiles"
+on child_profiles for insert
+with check (tutor_id = auth.uid());
+
+drop policy if exists "Tutors can update own child profiles" on child_profiles;
+create policy "Tutors can update own child profiles"
+on child_profiles for update
+using (tutor_id = auth.uid())
+with check (tutor_id = auth.uid());
+
+drop policy if exists "Tutors can delete own child profiles" on child_profiles;
+create policy "Tutors can delete own child profiles"
+on child_profiles for delete
+using (tutor_id = auth.uid());
+
+drop policy if exists "Tutors can read own tutor keys" on tutor_keys;
+create policy "Tutors can read own tutor keys"
+on tutor_keys for select
+using (
+  exists (
+    select 1
+    from child_profiles
+    where child_profiles.id = tutor_keys.child_profile_id
+      and child_profiles.tutor_id = auth.uid()
+  )
+);
+
+drop policy if exists "Tutors can insert own tutor keys" on tutor_keys;
+create policy "Tutors can insert own tutor keys"
+on tutor_keys for insert
+with check (
+  exists (
+    select 1
+    from child_profiles
+    where child_profiles.id = tutor_keys.child_profile_id
+      and child_profiles.tutor_id = auth.uid()
+  )
+);
+
+drop policy if exists "Tutors can update own tutor keys" on tutor_keys;
+create policy "Tutors can update own tutor keys"
+on tutor_keys for update
+using (
+  exists (
+    select 1
+    from child_profiles
+    where child_profiles.id = tutor_keys.child_profile_id
+      and child_profiles.tutor_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from child_profiles
+    where child_profiles.id = tutor_keys.child_profile_id
+      and child_profiles.tutor_id = auth.uid()
+  )
+);
+
+drop policy if exists "Tutors can delete own tutor keys" on tutor_keys;
+create policy "Tutors can delete own tutor keys"
+on tutor_keys for delete
+using (
+  exists (
+    select 1
+    from child_profiles
+    where child_profiles.id = tutor_keys.child_profile_id
+      and child_profiles.tutor_id = auth.uid()
+  )
+);
+
+insert into child_profiles (
+  id,
+  tutor_id,
+  full_name,
+  year_group,
+  age_range,
+  working_level,
+  target_grade,
+  preferred_subject,
+  active,
+  created_at,
+  updated_at
+)
+select
+  students.id,
+  students.tutor_id,
+  students.full_name,
+  students.year_group,
+  students.age::text,
+  students.current_grade,
+  students.target_grade,
+  lower(coalesce(
+    (
+      select subject
+      from unnest(coalesce(students.subjects, '{}'::text[])) as subject
+      where subject ilike '%math%'
+      limit 1
+    ),
+    students.subjects[1],
+    'maths'
+  )),
+  coalesce(students.status, 'active') = 'active',
+  coalesce(students.created_at, now()),
+  coalesce(students.updated_at, now())
+from students
+on conflict (id) do update
+set
+  tutor_id = excluded.tutor_id,
+  full_name = excluded.full_name,
+  year_group = excluded.year_group,
+  age_range = excluded.age_range,
+  working_level = excluded.working_level,
+  target_grade = excluded.target_grade,
+  preferred_subject = excluded.preferred_subject,
+  active = excluded.active,
+  updated_at = excluded.updated_at;
+
+insert into tutor_keys (
+  child_profile_id,
+  key_hash,
+  key_display,
+  status,
+  created_at
+)
+select
+  students.id,
+  encode(digest(upper(regexp_replace(trim(students.tutor_key), '\s+', '-', 'g')), 'sha256'), 'hex'),
+  upper(regexp_replace(trim(students.tutor_key), '\s+', '-', 'g')),
+  case when coalesce(students.status, 'active') = 'active' then 'active' else 'inactive' end,
+  coalesce(students.created_at, now())
+from students
+where students.tutor_key is not null
+on conflict (child_profile_id) where revoked_at is null do update
+set
+  key_hash = excluded.key_hash,
+  key_display = excluded.key_display,
+  status = excluded.status;
+
+drop trigger if exists set_child_profiles_updated_at on child_profiles;
+create trigger set_child_profiles_updated_at
+before update on child_profiles
+for each row execute function set_updated_at();

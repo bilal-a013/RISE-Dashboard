@@ -12,6 +12,19 @@ export function generateTutorKey(fullName: string): string {
   return `RISE-${initials}${suffix}`;
 }
 
+export function normaliseTutorKey(tutorKey: string): string {
+  return tutorKey.trim().toUpperCase().replace(/\s+/g, "-");
+}
+
+export async function hashTutorKey(tutorKey: string): Promise<string> {
+  const normalised = normaliseTutorKey(tutorKey);
+  const bytes = new TextEncoder().encode(normalised);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export function initialsFromName(fullName: string): string {
   return (
     fullName

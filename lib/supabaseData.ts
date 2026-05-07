@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { generateTutorKey } from "./tutorKey";
+import { generateTutorKey, hashTutorKey, normaliseTutorKey } from "./tutorKey";
 import { generateParentReport } from "./reportGenerator";
 import {
   reportSectionsFromParentReport,
@@ -40,7 +40,7 @@ function isUuid(value: string) {
 function isTutorKeyConflict(error: { code?: string; message?: string; details?: string } | null) {
   if (!error) return false;
   const text = `${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
-  return error.code === "23505" && text.includes("tutor_key");
+  return error.code === "23505" && (text.includes("tutor_key") || text.includes("key_hash"));
 }
 
 function formatSupabaseError(error: { code?: string; message?: string; details?: string; hint?: string } | null) {
@@ -59,7 +59,7 @@ async function getExistingTutorKeys(client: ReturnType<typeof requireSupabase>, 
 
   const { data, error } = await query;
   if (error) throw error;
-  return new Set(((data ?? []) as Array<{ tutor_key: string | null }>).map((row) => row.tutor_key?.trim().toUpperCase()).filter(Boolean) as string[]);
+  return new Set(((data ?? []) as Array<{ tutor_key: string | null }>).map((row) => (row.tutor_key ? normaliseTutorKey(row.tutor_key) : null)).filter(Boolean) as string[]);
 }
 
 async function generateUniqueTutorKey(client: ReturnType<typeof requireSupabase>, tutorId: string, fullName: string, excludeStudentId?: string) {
@@ -209,10 +209,70 @@ export async function findStudentByTutorKey(tutorKey: string) {
     .from("students")
     .select("*")
     .eq("tutor_id", tutorId)
-    .eq("tutor_key", tutorKey.trim().toUpperCase())
+    .eq("tutor_key", normaliseTutorKey(tutorKey))
     .maybeSingle();
   if (error) throw error;
   return data ? studentRowToChildProfile(data as StudentRow) : null;
+}
+
+async function upsertTutorKeyBridgeRows(
+  client: ReturnType<typeof requireSupabase>,
+  child: ChildProfile,
+  tutorId: string,
+  tutorKey: string
+) {
+  const normalisedTutorKey = normaliseTutorKey(tutorKey);
+  const keyHash = await hashTutorKey(normalisedTutorKey);
+  const preferredSubject = child.subjects.find((subject) => subject.toLowerCase().includes("math")) ?? child.subjects[0] ?? "maths";
+
+  const { error: childProfileError } = await client.from("child_profiles").upsert(
+    {
+      id: child.id,
+      tutor_id: tutorId,
+      full_name: child.fullName,
+      year_group: cleanText(child.yearGroup),
+      age_range: child.age ? String(child.age) : null,
+      working_level: cleanText(child.currentWorkingLevel || child.currentGrade),
+      target_grade: cleanText(child.targetLevel || child.targetGrade),
+      preferred_subject: preferredSubject.toLowerCase(),
+      active: (child.status || "active") === "active",
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" }
+  );
+
+  if (childProfileError) {
+    throw childProfileError;
+  }
+
+  const { data: existingKey, error: existingKeyError } = await client
+    .from("tutor_keys")
+    .select("id")
+    .eq("child_profile_id", child.id)
+    .is("revoked_at", null)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingKeyError) {
+    throw existingKeyError;
+  }
+
+  const keyRow = {
+    child_profile_id: child.id,
+    key_hash: keyHash,
+    key_display: normalisedTutorKey,
+    status: (child.status || "active") === "active" ? "active" : "inactive",
+    revoked_at: null,
+  };
+
+  const keyQuery = existingKey?.id
+    ? client.from("tutor_keys").update(keyRow).eq("id", existingKey.id)
+    : client.from("tutor_keys").insert(keyRow);
+
+  const { error: tutorKeyError } = await keyQuery;
+  if (tutorKeyError) {
+    throw tutorKeyError;
+  }
 }
 
 export async function upsertStudent(child: ChildProfile) {
@@ -224,7 +284,7 @@ export async function upsertStudent(child: ChildProfile) {
     throw existingError;
   }
   const isEditing = Boolean(existingStudent);
-  const tutorKey = child.tutorKey?.trim().toUpperCase() || (await generateUniqueTutorKey(client, tutorId, child.fullName, child.id));
+  const tutorKey = child.tutorKey ? normaliseTutorKey(child.tutorKey) : await generateUniqueTutorKey(client, tutorId, child.fullName, child.id);
   const rowBase = {
     id: child.id || crypto.randomUUID(),
     tutor_id: tutorId,
@@ -270,7 +330,19 @@ export async function upsertStudent(child: ChildProfile) {
     const query = isEditing ? client.from("students").upsert(row, { onConflict: "id" }) : client.from("students").insert(row);
     const { data, error } = await query.select("*").single();
     if (!error && data) {
-      return studentRowToChildProfile(data as StudentRow);
+      const savedChild = studentRowToChildProfile(data as StudentRow);
+      try {
+        await upsertTutorKeyBridgeRows(client, savedChild, tutorId, nextTutorKey);
+      } catch (bridgeError) {
+        lastError = bridgeError as { code?: string; message?: string; details?: string };
+        if (isTutorKeyConflict(lastError) && attempt < 2) {
+          nextTutorKey = await generateUniqueTutorKey(client, tutorId, child.fullName, child.id);
+          continue;
+        }
+
+        throw bridgeError;
+      }
+      return savedChild;
     }
 
     lastError = error;
