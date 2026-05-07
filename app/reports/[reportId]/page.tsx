@@ -119,6 +119,7 @@ function buildStyledEmail(child: ChildProfile, session: SessionLog, report: Pare
 
 export default function ReportPage() {
   const params = useParams<{ reportId: string }>();
+  const reportId = Array.isArray(params.reportId) ? params.reportId[0] : params.reportId;
   const [data, setData] = useState<{ child: ChildProfile; session: SessionLog; report: ParentReport } | null>(null);
   const [status, setStatus] = useState("Loading report...");
   const [deleteText, setDeleteText] = useState("");
@@ -129,7 +130,14 @@ export default function ReportPage() {
   const isDev = process.env.NODE_ENV !== "production";
 
   useEffect(() => {
-    getReportBundle(params.reportId)
+    setData(null);
+    setDeleteOpen(false);
+    setDeleteText("");
+    setSendOpen(false);
+    setCopyStatus("");
+    setStatus("Loading report...");
+    if (!reportId) return;
+    getReportBundle(reportId)
       .then((bundle) => {
         if (!bundle.session) {
           setStatus("No session found for this report.");
@@ -143,7 +151,7 @@ export default function ReportPage() {
         setStatus("");
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Could not load report."));
-  }, [params.reportId]);
+  }, [reportId]);
 
   const reportEmail = data?.child.parentEmail || "";
   const reportDate = data ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(data.session.sessionDate)) : "";
@@ -162,11 +170,12 @@ export default function ReportPage() {
     : [];
 
   async function confirmDelete() {
-    if (!data) return;
+    if (!reportId) return;
     try {
-      await deleteReport(data.report.id);
+      const deletedTitle = data?.report.title ?? "Report";
+      await deleteReport(reportId);
       setStatus("Report deleted.");
-      toast({ title: "Report deleted", description: `${data.report.title} was removed from Supabase.`, variant: "success" });
+      toast({ title: "Report deleted", description: `${deletedTitle} was removed from Supabase.`, variant: "success" });
       setDeleteOpen(false);
       window.location.href = "/reports";
     } catch (error) {

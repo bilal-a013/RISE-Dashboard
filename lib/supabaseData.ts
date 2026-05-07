@@ -464,8 +464,7 @@ export async function markReportSent(reportId: string, sentTo?: string | null) {
 
 export async function deleteReport(reportId: string) {
   const client = requireSupabase();
-  const tutorId = await getCurrentUserId();
-  const { error } = await client.from("reports").delete().eq("id", reportId).eq("tutor_id", tutorId);
+  const { error } = await client.from("reports").delete().eq("id", reportId);
   if (error) throw error;
 }
 
