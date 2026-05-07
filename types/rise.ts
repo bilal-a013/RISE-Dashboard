@@ -10,6 +10,7 @@ export type Tutor = {
 export type ChildProfile = {
   id: string;
   tutorKey: string;
+  childProfileId?: string;
   tutorId?: string;
   fullName: string;
   preferredName?: string;
@@ -142,6 +143,7 @@ export type ProfileRow = {
 
 export type StudentRow = {
   id: string;
+  child_profile_id?: string | null;
   tutor_id: string;
   full_name: string;
   preferred_name: string | null;
@@ -223,4 +225,57 @@ export type ParentReplyRow = {
   body: string | null;
   received_at: string | null;
   gmail_thread_id: string | null;
+};
+
+export type StudentAppActivityRow = {
+  id: string;
+  child_profile_id: string;
+  activity_type: string;
+  title: string | null;
+  description: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+};
+
+export type StudentProgressRow = {
+  id: string;
+  child_profile_id: string;
+  subject: string | null;
+  topic: string | null;
+  skill: string | null;
+  status: string | null;
+  confidence_level: string | null;
+  score: number | null;
+  attempts: number | null;
+  last_practised_at: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+export type LessonAttemptRow = {
+  id: string;
+  child_profile_id: string;
+  lesson_id: string | null;
+  subject: string | null;
+  topic: string | null;
+  activity_title: string | null;
+  score: number | null;
+  total_questions: number | null;
+  correct_answers: number | null;
+  time_spent_seconds: number | null;
+  weak_areas: string[] | null;
+  completed_at: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
+export type StudentAppActivitySummary = {
+  childProfileId: string | null;
+  lastActiveAt: string | null;
+  recentActivity: StudentAppActivityRow[];
+  activitySinceLastSession: number | null;
+  progress: StudentProgressRow[];
+  lessonAttempts: LessonAttemptRow[];
+  progressPlaceholder: string;
+  lessonAttemptsPlaceholder: string;
+  unavailableReason?: string;
 };

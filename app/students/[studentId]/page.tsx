@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { BookOpen, CalendarDays, FilePlus2, Pencil, UserRound } from "lucide-react";
+import { AppActivityCard } from "../../../components/rise/AppActivityCard";
 import { ProtectedContent } from "../../../components/rise/AuthProvider";
 import { BrandButton } from "../../../components/rise/BrandButton";
 import { Card } from "../../../components/rise/Card";
@@ -13,15 +14,17 @@ import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
 import { useToast } from "../../../components/rise/ToastProvider";
 import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
+import { getStudentAppActivitySummary } from "../../../lib/appActivity";
 import { getStudent, listReports, listSessions } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
-import type { ChildProfile, ReportRow, SessionLog } from "../../../types/rise";
+import type { ChildProfile, ReportRow, SessionLog, StudentAppActivitySummary } from "../../../types/rise";
 
 export default function StudentOverviewPage() {
   const params = useParams<{ studentId: string }>();
   const [student, setStudent] = useState<ChildProfile | null>(null);
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [appActivity, setAppActivity] = useState<StudentAppActivitySummary | null>(null);
   const [status, setStatus] = useState("Loading student...");
   const { toast } = useToast();
 
@@ -33,9 +36,11 @@ export default function StudentOverviewPage() {
           listSessions(params.studentId),
           listReports(params.studentId),
         ]);
+        const activityData = await getStudentAppActivitySummary(child, sessionData[0]?.sessionDate);
         setStudent(child);
         setSessions(sessionData);
         setReports(reportData);
+        setAppActivity(activityData);
         setStatus("");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Could not load student.");
@@ -163,28 +168,31 @@ export default function StudentOverviewPage() {
               </div>
             </Card>
 
-            <Card className="space-y-4 lg:col-span-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Progress</p>
-                <div className="mt-3">
-                  <ProgressSegments value={progressValue} />
+            <div className="space-y-6 lg:col-span-4">
+              <Card className="space-y-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Progress</p>
+                  <div className="mt-3">
+                    <ProgressSegments value={progressValue} />
+                  </div>
+                  <p className="mt-3 text-sm text-[var(--rise-text-muted)]">
+                    Latest session: {latestSession ? `${latestSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(latestSession.sessionDate))}` : "No sessions logged yet."}
+                  </p>
                 </div>
-                <p className="mt-3 text-sm text-[var(--rise-text-muted)]">
-                  Latest session: {latestSession ? `${latestSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(latestSession.sessionDate))}` : "No sessions logged yet."}
-                </p>
-              </div>
-              <div className="border-t border-[var(--rise-border)] pt-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Parent contact</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--rise-heading)]">{student.parentName}</p>
-                <p className="text-sm text-[var(--rise-text-muted)]">{student.parentEmail || "No parent email set"}</p>
-                <p className="mt-2 text-sm text-[var(--rise-text-muted)]">{student.parentRelationship || "Parent / guardian"}</p>
-              </div>
-              <div className="border-t border-[var(--rise-border)] pt-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Current plan</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.currentHomework || "No homework set."}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.nextSessionFocus || "No next focus added yet."}</p>
-              </div>
-            </Card>
+                <div className="border-t border-[var(--rise-border)] pt-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Parent contact</p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--rise-heading)]">{student.parentName}</p>
+                  <p className="text-sm text-[var(--rise-text-muted)]">{student.parentEmail || "No parent email set"}</p>
+                  <p className="mt-2 text-sm text-[var(--rise-text-muted)]">{student.parentRelationship || "Parent / guardian"}</p>
+                </div>
+                <div className="border-t border-[var(--rise-border)] pt-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Current plan</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.currentHomework || "No homework set."}</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.nextSessionFocus || "No next focus added yet."}</p>
+                </div>
+              </Card>
+              <AppActivityCard summary={appActivity} />
+            </div>
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">

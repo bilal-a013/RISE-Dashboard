@@ -106,6 +106,7 @@ export async function upsertProfile(fullName: string, email: string) {
 export function studentRowToChildProfile(row: StudentRow): ChildProfile {
   return {
     id: row.id,
+    childProfileId: row.child_profile_id ?? undefined,
     tutorId: row.tutor_id,
     tutorKey: row.tutor_key,
     fullName: row.full_name,
