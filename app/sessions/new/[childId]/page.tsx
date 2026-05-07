@@ -184,21 +184,21 @@ export default function NewSessionPage() {
 
         <div className="grid gap-8 lg:grid-cols-12">
           <section className="space-y-6 lg:col-span-8">
-            <Card className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <Card className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e1e0ff] text-xl font-black text-[#4648d4]">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--rise-purple-soft)] text-xl font-black text-[var(--rise-purple)]">
                   {initialsFromName(child.fullName)}
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold">{child.fullName}</h2>
-                  <p className="mt-1 text-sm text-[#464554]">
+                  <p className="mt-1 text-sm text-[var(--rise-text-muted)]">
                     {child.subjects.join(" / ")} · {child.currentWorkingLevel}→{child.targetLevel.replace("Grade ", "")}
                   </p>
                 </div>
               </div>
-              <div className="rounded-xl border border-[#c7c4d7] bg-[#efecf8] px-5 py-3 text-center">
-                <span className="block text-xs font-bold uppercase tracking-wide text-[#767586]">Student ID</span>
-                <span className="font-mono text-xl font-black text-[#4648d4]">{child.tutorKey}</span>
+              <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-5 py-3 text-center">
+                <span className="block text-xs font-bold uppercase tracking-wide text-[var(--rise-text-soft)]">Student ID</span>
+                <span className="font-mono text-xl font-black text-[var(--rise-purple)]">{child.tutorKey}</span>
               </div>
             </Card>
 

@@ -427,12 +427,12 @@ export default function ReportPage() {
         ) : null}
 
         {sendOpen ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 print:hidden">
-            <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-[#c7c4d7] bg-white shadow-2xl">
-              <div className="flex items-center justify-between border-b border-[#e9e6f3] bg-[#f5f2fe] px-6 py-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-4 print:hidden">
+            <div className="flex max-h-[85vh] w-full max-w-[980px] flex-col overflow-hidden rounded-3xl border border-[var(--rise-border)] bg-[var(--rise-surface)] shadow-2xl">
+              <div className="flex flex-none items-center justify-between border-b border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-4 py-3 sm:px-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-[#1b1b23]">Send to Parent</h3>
-                  <p className="text-sm text-[#464554]">Preview the email, download the PDF, then send or mark as sent.</p>
+                  <h3 className="text-lg font-semibold text-[var(--rise-heading)] sm:text-xl">Send to Parent</h3>
+                  <p className="text-sm text-[var(--rise-text-muted)]">Preview the email, download the PDF, then send or mark as sent.</p>
                 </div>
                 <BrandButton
                   variant="secondary"
@@ -440,43 +440,37 @@ export default function ReportPage() {
                     setSendOpen(false);
                     setCopyStatus("");
                   }}
-                >
+                  >
                   Close
                 </BrandButton>
               </div>
-              <div className="grid gap-6 p-6 lg:grid-cols-2">
-                <div className="space-y-4">
-                  <Card className="space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="grid min-h-0 gap-4 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[1.05fr_0.95fr]">
+                <div className="min-h-0 space-y-4">
+                  <Card className="space-y-3 p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#4648d4]">Email draft</p>
-                        <h4 className="text-lg font-semibold text-[#1b1b23]">{emailSubject}</h4>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--rise-purple)]">Email draft</p>
+                        <h4 className="max-w-full break-words text-base font-semibold text-[var(--rise-heading)] sm:text-lg">{emailSubject}</h4>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                         <BrandButton variant="secondary" onClick={copyEmail}>
                           <Copy className="h-4 w-4" />
                           Copy styled email
                         </BrandButton>
-                        <BrandButton
-                          variant="secondary"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(emailText);
-                              setCopyStatus("Plain text copied.");
-                              toast({ title: "Plain text copied", description: "A clean version of the email is on your clipboard.", variant: "success" });
-                            } catch {
-                              setCopyStatus("Could not copy plain text.");
-                              toast({ title: "Could not copy plain text", description: "Please try again.", variant: "error" });
-                            }
-                          }}
-                        >
+                        <BrandButton variant="secondary" onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(emailText);
+                            setCopyStatus("Plain text copied.");
+                            toast({ title: "Plain text copied", description: "A clean version of the email is on your clipboard.", variant: "success" });
+                          } catch {
+                            setCopyStatus("Could not copy plain text.");
+                            toast({ title: "Could not copy plain text", description: "Please try again.", variant: "error" });
+                          }
+                        }}>
                           <Copy className="h-4 w-4" />
                           Copy plain text
                         </BrandButton>
-                        <BrandButton
-                          variant="secondary"
-                          onClick={() => window.open(`mailto:${reportEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailText)}`, "_blank")}
-                        >
+                        <BrandButton variant="secondary" onClick={() => window.open(`mailto:${reportEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailText)}`, "_blank")}>
                           <Mail className="h-4 w-4" />
                           Open Draft
                         </BrandButton>
@@ -486,8 +480,8 @@ export default function ReportPage() {
                         </BrandButton>
                       </div>
                     </div>
-                    {copyStatus ? <p className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] px-3 py-2 text-sm text-[#464554]">{copyStatus}</p> : null}
-                    <div className="overflow-hidden rounded-3xl border border-[#c7c4d7] bg-white">
+                    {copyStatus ? <p className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] px-3 py-2 text-sm text-[var(--rise-text-muted)]">{copyStatus}</p> : null}
+                    <div className="overflow-hidden rounded-3xl border border-[var(--rise-border)] bg-[var(--rise-surface)]">
                       <div
                         className="bg-[linear-gradient(135deg,#4648d4_0%,#8127cf_100%)] px-5 py-4 text-white"
                         style={emailPreviewStyle}
@@ -498,47 +492,47 @@ export default function ReportPage() {
                           {reportDate} · {session.topic}
                         </p>
                       </div>
-                      <div className="grid gap-3 p-5 md:grid-cols-2" style={emailPreviewStyle}>
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4 md:col-span-2">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Parent update</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">
+                      <div className="grid gap-3 p-4 sm:p-5 md:grid-cols-2" style={emailPreviewStyle}>
+                        <div className="rounded-2xl bg-[var(--rise-surface-soft)] p-4 md:col-span-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--rise-purple)]">Parent update</p>
+                          <p className="mt-2 text-sm leading-6 text-[var(--rise-text)]">
                             Here is {child.fullName}&apos;s latest tutoring update from today&apos;s session.
                           </p>
                         </div>
                         {emailCards.map((item) => (
-                          <div key={item.label} className={`rounded-2xl bg-white p-4 border border-[#e9e6f3] ${item.span}`}>
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">{item.label}</p>
-                            <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{item.value}</p>
+                          <div key={item.label} className={`rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 ${item.span}`}>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--rise-purple)]">{item.label}</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--rise-text)]">{item.value}</p>
                           </div>
                         ))}
-                        <div className="rounded-2xl bg-[#f5f2fe] p-4 md:col-span-2">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#4648d4]">Tutor summary</p>
-                          <p className="mt-2 text-sm leading-6 text-[#1b1b23]">{report.tutorSummary}</p>
+                        <div className="rounded-2xl bg-[var(--rise-surface-soft)] p-4 md:col-span-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--rise-purple)]">Tutor summary</p>
+                          <p className="mt-2 text-sm leading-6 text-[var(--rise-text)]">{report.tutorSummary}</p>
                         </div>
                       </div>
                     </div>
-                    <p className="text-sm leading-6 text-[#464554]">For best formatting, copy the styled email and paste it into Gmail.</p>
+                    <p className="text-sm leading-6 text-[var(--rise-text-muted)]">For best formatting, copy the styled email and paste it into Gmail.</p>
                   </Card>
                 </div>
-                <div className="space-y-4">
-                  <Card className="space-y-4">
+                <div className="min-h-0 space-y-4">
+                  <Card className="space-y-4 p-4 sm:p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#4648d4]">Parent delivery</p>
-                        <h4 className="text-lg font-semibold text-[#1b1b23]">Ready to send</h4>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--rise-purple)]">Parent delivery</p>
+                        <h4 className="text-lg font-semibold text-[var(--rise-heading)]">Ready to send</h4>
                       </div>
-                      <span className="rounded-full bg-[#e1e0ff] px-3 py-1 text-xs font-bold text-[#4648d4]">draft</span>
+                      <span className="rounded-full bg-[var(--rise-purple-soft)] px-3 py-1 text-xs font-bold text-[var(--rise-purple)]">draft</span>
                     </div>
-                    <div className="rounded-2xl border border-[#c7c4d7] bg-white p-4">
-                      <p className="text-sm font-semibold text-[#1b1b23]">To</p>
-                      <p className="mt-1 text-sm text-[#464554]">{reportEmail || "No parent email set"}</p>
-                      <p className="mt-3 text-sm font-semibold text-[#1b1b23]">Subject</p>
-                      <p className="mt-1 text-sm text-[#464554]">{emailSubject}</p>
+                    <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4">
+                      <p className="text-sm font-semibold text-[var(--rise-heading)]">To</p>
+                      <p className="mt-1 break-words text-sm text-[var(--rise-text-muted)]">{reportEmail || "No parent email set"}</p>
+                      <p className="mt-3 text-sm font-semibold text-[var(--rise-heading)]">Subject</p>
+                      <p className="mt-1 break-words text-sm text-[var(--rise-text-muted)]">{emailSubject}</p>
                     </div>
-                    <div className="rounded-2xl border border-[#c7c4d7] bg-[#fffaf2] p-4 text-sm leading-6 text-[#764800]">
+                    <div className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm leading-6 text-[var(--rise-text-muted)]">
                       For best formatting, copy the styled email and paste it into Gmail. The plain-text draft is available if you prefer it.
                     </div>
-                    <div className="flex flex-wrap justify-end gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                       <BrandButton variant="secondary" onClick={() => setSendOpen(false)}>
                         Cancel
                       </BrandButton>
@@ -551,14 +545,17 @@ export default function ReportPage() {
                       </BrandButton>
                     </div>
                   </Card>
-                  <Card className="space-y-3">
+                  <Card className="space-y-3 p-4 sm:p-5">
                     <div className="flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4 text-[#4648d4]" />
-                      <h4 className="text-base font-semibold text-[#1b1b23]">Email preview HTML</h4>
+                      <ExternalLink className="h-4 w-4 text-[var(--rise-purple)]" />
+                      <h4 className="text-base font-semibold text-[var(--rise-heading)]">Email preview HTML</h4>
                     </div>
-                    <pre className="max-h-[30rem] overflow-auto rounded-2xl border border-[#e9e6f3] bg-[#1b1b23] p-4 text-[11px] leading-5 text-[#f2effb]">
-                      {emailHtml}
-                    </pre>
+                    <details className="rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-3">
+                      <summary className="cursor-pointer text-sm font-semibold text-[var(--rise-heading)]">Show HTML</summary>
+                      <pre className="mt-3 max-h-56 overflow-auto rounded-2xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-3 text-[10px] leading-5 text-[var(--rise-text-muted)]">
+                        {emailHtml}
+                      </pre>
+                    </details>
                   </Card>
                 </div>
               </div>

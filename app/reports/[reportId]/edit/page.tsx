@@ -79,63 +79,63 @@ export default function EditReportPage() {
 
   return (
     <ProtectedContent>
-      <main className="min-h-screen bg-[#fcf8ff] animate-rise-page dark:bg-slate-950">
+      <main className="rise-page min-h-screen animate-rise-page">
         <TopNav />
-        <div className="mx-auto max-w-4xl px-6 py-10">
-          <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-[#1b1b23]">Edit Report</h1>
-            <p className="mt-2 text-lg text-[#464554]">
+        <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+          <header className="mb-6 sm:mb-8">
+            <h1 className="text-3xl font-semibold text-[var(--rise-heading)]">Edit Report</h1>
+            <p className="mt-2 text-base text-[var(--rise-text-muted)] sm:text-lg">
               {report
                 ? `Editing the report for ${studentName} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(sessionDate))}.`
                 : "Update the stored parent report before saving."}
             </p>
           </header>
 
-          {status ? <p className="mb-6 rounded-xl border border-[#c7c4d7] bg-white p-4 text-sm font-semibold text-[#464554]">{status}</p> : null}
+          {status ? <p className="mb-6 rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4 text-sm font-semibold text-[var(--rise-text-muted)]">{status}</p> : null}
 
-          <Card className="space-y-6">
+          <Card className="space-y-6 p-5 sm:p-6">
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-[#1b1b23]">Title</span>
+                <span className="text-sm font-semibold text-[var(--rise-heading)]">Title</span>
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+                  className="rise-input h-12 w-full px-4"
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-[#1b1b23]">Sent status</span>
+                <span className="text-sm font-semibold text-[var(--rise-heading)]">Sent status</span>
                 <select
                   value={sentStatus}
                   onChange={(event) => setSentStatus(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+                  className="rise-input h-12 w-full px-4"
                 >
                   <option value="draft">Draft</option>
                   <option value="sent">Sent</option>
                 </select>
               </label>
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm font-semibold text-[#1b1b23]">Parent email</span>
+                <span className="text-sm font-semibold text-[var(--rise-heading)]">Parent email</span>
                 <input
                   value={sentTo}
                   onChange={(event) => setSentTo(event.target.value)}
                   type="email"
-                  className="h-12 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+                  className="rise-input h-12 w-full px-4"
                 />
               </label>
             </div>
 
             <label className="space-y-2 block">
-              <span className="text-sm font-semibold text-[#1b1b23]">Report body</span>
+              <span className="text-sm font-semibold text-[var(--rise-heading)]">Report body</span>
               <textarea
                 value={body}
                 onChange={(event) => setBody(event.target.value)}
                 rows={10}
-                className="min-h-64 w-full rounded-2xl border border-[#c7c4d7] bg-white px-4 py-3 leading-7 outline-none transition focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff]"
+                className="rise-input min-h-64 w-full px-4 py-3 leading-7"
               />
             </label>
 
-            <div className="flex flex-wrap justify-end gap-3">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <BrandButton variant="secondary" onClick={() => router.push(`/reports/${params.reportId}`)}>
                 Cancel
               </BrandButton>

@@ -104,15 +104,15 @@ export default function StudentOverviewPage() {
             <Card className="flex flex-col gap-5 lg:col-span-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e1e0ff] text-2xl font-black text-[#4648d4]">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--rise-purple-soft)] text-2xl font-black text-[var(--rise-purple)]">
                     {initialsFromName(student.fullName)}
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-2xl font-semibold text-[#1b1b23]">{student.fullName}</h2>
-                      <span className="rounded-full bg-[#e1e0ff] px-3 py-1 text-xs font-bold text-[#4648d4]">{student.status || "active"}</span>
+                      <h2 className="text-2xl font-semibold text-[var(--rise-heading)]">{student.fullName}</h2>
+                      <span className="rounded-full bg-[var(--rise-purple-soft)] px-3 py-1 text-xs font-bold text-[var(--rise-purple)]">{student.status || "active"}</span>
                     </div>
-                    <p className="mt-1 text-sm text-[#464554]">
+                    <p className="mt-1 text-sm text-[var(--rise-text-muted)]">
                       {student.subjects.join(" / ") || "No subjects set"} · {student.school || "School not set"}
                     </p>
                   </div>
@@ -129,60 +129,60 @@ export default function StudentOverviewPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Current level / grade</p>
-                  <p className="mt-2 text-lg font-semibold text-[#1b1b23]">{student.currentWorkingLevel}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Current level / grade</p>
+                  <p className="mt-2 text-lg font-semibold text-[var(--rise-heading)]">{student.currentWorkingLevel}</p>
                 </div>
-                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Target level / grade</p>
-                  <p className="mt-2 text-lg font-semibold text-[#1b1b23]">{student.targetLevel}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Target level / grade</p>
+                  <p className="mt-2 text-lg font-semibold text-[var(--rise-heading)]">{student.targetLevel}</p>
                 </div>
-                <div className="rounded-xl border border-[#e9e6f3] bg-[#f5f2fe] p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Tutor key</p>
-                  <p className="mt-2 font-mono text-lg font-black tracking-widest text-[#4648d4]">{student.tutorKey}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface-soft)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Tutor key</p>
+                  <p className="mt-2 font-mono text-lg font-black tracking-widest text-[var(--rise-purple)]">{student.tutorKey}</p>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Goals</p>
-                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.mainGoals || "No goals added yet."}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Goals</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.mainGoals || "No goals added yet."}</p>
                 </div>
-                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Learning style</p>
-                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.learningStyle || "Not set"}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Learning style</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.learningStyle || "Not set"}</p>
                 </div>
-                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Strengths</p>
-                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.strengths?.length ? student.strengths.join(", ") : "Not set"}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Strengths</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.strengths?.length ? student.strengths.join(", ") : "Not set"}</p>
                 </div>
-                <div className="rounded-xl border border-[#e9e6f3] bg-white p-4">
-                  <p className="text-xs font-bold uppercase text-[#767586]">Struggles</p>
-                  <p className="mt-2 text-sm leading-6 text-[#464554]">{student.struggles?.length ? student.struggles.join(", ") : "Not set"}</p>
+                <div className="rounded-xl border border-[var(--rise-border)] bg-[var(--rise-surface)] p-4">
+                  <p className="text-xs font-bold uppercase text-[var(--rise-text-soft)]">Struggles</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.struggles?.length ? student.struggles.join(", ") : "Not set"}</p>
                 </div>
               </div>
             </Card>
 
             <Card className="space-y-4 lg:col-span-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Progress</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Progress</p>
                 <div className="mt-3">
                   <ProgressSegments value={progressValue} />
                 </div>
-                <p className="mt-3 text-sm text-[#464554]">
+                <p className="mt-3 text-sm text-[var(--rise-text-muted)]">
                   Latest session: {latestSession ? `${latestSession.topic} on ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(latestSession.sessionDate))}` : "No sessions logged yet."}
                 </p>
               </div>
-              <div className="border-t border-[#e9e6f3] pt-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Parent contact</p>
-                <p className="mt-2 text-sm font-semibold text-[#1b1b23]">{student.parentName}</p>
-                <p className="text-sm text-[#464554]">{student.parentEmail || "No parent email set"}</p>
-                <p className="mt-2 text-sm text-[#464554]">{student.parentRelationship || "Parent / guardian"}</p>
+              <div className="border-t border-[var(--rise-border)] pt-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Parent contact</p>
+                <p className="mt-2 text-sm font-semibold text-[var(--rise-heading)]">{student.parentName}</p>
+                <p className="text-sm text-[var(--rise-text-muted)]">{student.parentEmail || "No parent email set"}</p>
+                <p className="mt-2 text-sm text-[var(--rise-text-muted)]">{student.parentRelationship || "Parent / guardian"}</p>
               </div>
-              <div className="border-t border-[#e9e6f3] pt-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#767586]">Current plan</p>
-                <p className="mt-2 text-sm leading-6 text-[#464554]">{student.currentHomework || "No homework set."}</p>
-                <p className="mt-2 text-sm leading-6 text-[#464554]">{student.nextSessionFocus || "No next focus added yet."}</p>
+              <div className="border-t border-[var(--rise-border)] pt-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--rise-text-soft)]">Current plan</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.currentHomework || "No homework set."}</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.nextSessionFocus || "No next focus added yet."}</p>
               </div>
             </Card>
           </section>
