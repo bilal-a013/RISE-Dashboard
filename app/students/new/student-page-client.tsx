@@ -96,7 +96,54 @@ const currentLevelOptions = [
   "Grade 8",
   "Grade 9",
 ];
-const sessionFrequencyOptions = ["", "Weekly", "Twice weekly", "Fortnightly", "Ad hoc"];
+const sessionFrequencyOptions = ["", "Weekly", "Twice weekly", "Fortnightly", "Ad hoc", "Intensive / exam prep"];
+const mainLearningPriorityOptions = [
+  "",
+  "Confidence building",
+  "Catch-up support",
+  "Exam preparation",
+  "Homework support",
+  "Core skills",
+  "Stretch / higher grades",
+  "Reading fluency",
+  "Writing improvement",
+  "Maths foundations",
+  "Science understanding",
+];
+const homeworkStatusOptions = [
+  "",
+  "No homework set",
+  "Set each session",
+  "Cognito assigned",
+  "School homework support",
+  "Parent-led practice",
+  "Revision tasks",
+];
+const longTermGoalOptions = [
+  "",
+  "Reach expected level",
+  "Move up one grade",
+  "Build confidence",
+  "Improve exam technique",
+  "Secure Grade 5",
+  "Secure Grade 7+",
+  "Improve foundations",
+  "Prepare for SATs",
+  "Prepare for GCSEs",
+  "Custom",
+];
+const nextSessionFocusOptions = [
+  "",
+  "Review homework",
+  "Recap weak topic",
+  "New topic",
+  "Exam questions",
+  "Timed practice",
+  "Reading comprehension",
+  "Writing task",
+  "Problem solving",
+  "Custom",
+];
 const reportPreferenceOptions: Array<{ value: NonNullable<ChildProfile["preferredReportMethod"]>; label: string }> = [
   { value: "email", label: "Email Digest" },
   { value: "pdf", label: "Dashboard Link / PDF" },
@@ -131,15 +178,23 @@ export default function NewStudentPageClient() {
   const [parentEmail, setParentEmail] = useState("");
   const [parentPhone, setParentPhone] = useState("");
   const [reportMethod, setReportMethod] = useState<ChildProfile["preferredReportMethod"]>("email");
+  const [mainLearningPriority, setMainLearningPriority] = useState("");
+  const [homeworkStatus, setHomeworkStatus] = useState("");
   const [currentHomework, setCurrentHomework] = useState("");
   const [homeworkDueDate, setHomeworkDueDate] = useState("");
   const [sessionFrequency, setSessionFrequency] = useState("");
-  const [longTermTarget, setLongTermTarget] = useState("");
-  const [nextSessionFocus, setNextSessionFocus] = useState("");
+  const [longTermTargetPreset, setLongTermTargetPreset] = useState("");
+  const [longTermTargetCustom, setLongTermTargetCustom] = useState("");
+  const [nextSessionFocusPreset, setNextSessionFocusPreset] = useState("");
+  const [nextSessionFocusCustom, setNextSessionFocusCustom] = useState("");
   const [tutorNotes, setTutorNotes] = useState("");
   const [tutorKey, setTutorKey] = useState("RISE-NEW");
   const [status, setStatus] = useState("Tutor key ready");
   const isDev = process.env.NODE_ENV !== "production";
+
+  function resolveSelection(selected: string, custom: string) {
+    return selected === "Custom" ? custom.trim() : selected;
+  }
 
   useEffect(() => {
     const childId = searchParams.get("childId");
@@ -162,6 +217,7 @@ export default function NewStudentPageClient() {
         setCurrentWorkingLevel(child.currentWorkingLevel);
         setTargetLevel(child.targetLevel);
         setMainGoals(child.mainGoals || "");
+        setMainLearningPriority(child.mainLearningPriority || child.mainGoals || "");
         setStrengths(child.strengths || []);
         setStruggles(child.struggles || []);
         setCurrentTopics(child.currentTopics?.join(", ") || "");
@@ -171,11 +227,16 @@ export default function NewStudentPageClient() {
         setParentEmail(child.parentEmail);
         setParentPhone(child.parentPhone || "");
         setReportMethod(child.parentReportPreference || child.preferredReportMethod || "email");
+        setHomeworkStatus(child.homeworkStatus || "");
         setCurrentHomework(child.currentHomework || "");
         setHomeworkDueDate(child.homeworkDueDate || "");
         setSessionFrequency(child.sessionFrequency || "");
-        setLongTermTarget(child.longTermTarget || child.longTermGoal || "");
-        setNextSessionFocus(child.nextSessionFocus || "");
+        const longTerm = child.longTermTarget || child.longTermGoal || "";
+        const nextFocus = child.nextSessionFocus || "";
+        setLongTermTargetPreset(longTermGoalOptions.includes(longTerm) ? longTerm : longTerm ? "Custom" : "");
+        setLongTermTargetCustom(longTermGoalOptions.includes(longTerm) || !longTerm ? "" : longTerm);
+        setNextSessionFocusPreset(nextSessionFocusOptions.includes(nextFocus) ? nextFocus : nextFocus ? "Custom" : "");
+        setNextSessionFocusCustom(nextSessionFocusOptions.includes(nextFocus) || !nextFocus ? "" : nextFocus);
         setTutorNotes(child.tutorNotes || "");
         setStatus("Loaded child profile for editing");
       })
@@ -189,47 +250,51 @@ export default function NewStudentPageClient() {
 
   function buildChild(): ChildProfile {
     const timestamp = new Date().toISOString();
-      return {
-        id: editingId || crypto.randomUUID(),
-        tutorKey: tutorKey === "RISE-NEW" && fullName.trim() ? generateTutorKey(fullName) : tutorKey,
-        fullName,
-        preferredName,
-        age: Number(age) || undefined,
-        educationStage: educationStage || undefined,
-        pronouns,
-        yearGroup,
-        school,
-        subjects,
-        examBoard,
-        currentWorkingLevel,
-        targetLevel,
-        currentGrade: currentWorkingLevel,
-        targetGrade: targetLevel,
-        mainGoals,
-        confidenceLevel: 3,
-        strengths,
-        struggles,
-        currentTopics: currentTopics
-          .split(",")
-          .map((topic) => topic.trim())
-          .filter(Boolean),
-        learningStyle,
-        parentName,
-        parentRelationship,
-        parentEmail,
-        parentPhone,
-        preferredReportMethod: reportMethod,
-        parentReportPreference: reportMethod,
-        currentHomework,
-        homeworkDueDate: homeworkDueDate || undefined,
-        sessionFrequency,
-        longTermGoal: longTermTarget,
-        longTermTarget,
-        nextSessionFocus,
-        tutorNotes,
-        createdAt: createdAt || timestamp,
-        updatedAt: timestamp,
-      };
+    const longTermTarget = resolveSelection(longTermTargetPreset, longTermTargetCustom);
+    const nextSessionFocus = resolveSelection(nextSessionFocusPreset, nextSessionFocusCustom);
+    return {
+      id: editingId || crypto.randomUUID(),
+      tutorKey: tutorKey === "RISE-NEW" && fullName.trim() ? generateTutorKey(fullName) : tutorKey,
+      fullName,
+      preferredName,
+      age: Number(age) || undefined,
+      educationStage: educationStage || undefined,
+      pronouns,
+      yearGroup,
+      school,
+      subjects,
+      examBoard,
+      currentWorkingLevel,
+      targetLevel,
+      currentGrade: currentWorkingLevel,
+      targetGrade: targetLevel,
+      mainGoals,
+      mainLearningPriority,
+      homeworkStatus,
+      confidenceLevel: 3,
+      strengths,
+      struggles,
+      currentTopics: currentTopics
+        .split(",")
+        .map((topic) => topic.trim())
+        .filter(Boolean),
+      learningStyle,
+      parentName,
+      parentRelationship,
+      parentEmail,
+      parentPhone,
+      preferredReportMethod: reportMethod,
+      parentReportPreference: reportMethod,
+      currentHomework,
+      homeworkDueDate: homeworkDueDate || undefined,
+      sessionFrequency,
+      longTermGoal: longTermTarget,
+      longTermTarget,
+      nextSessionFocus,
+      tutorNotes,
+      createdAt: createdAt || timestamp,
+      updatedAt: timestamp,
+    };
   }
 
   async function saveProfile() {
@@ -395,26 +460,75 @@ export default function NewStudentPageClient() {
 
             <Card>
               <h2 className="mb-5 text-xl font-semibold">Current Plan</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input value={currentHomework} onChange={(event) => setCurrentHomework(event.target.value)} placeholder="Current homework assigned" className="h-12 rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[#464554]">Homework due date</span>
-                  <input value={homeworkDueDate} onChange={(event) => setHomeworkDueDate(event.target.value)} type="date" className="h-12 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
-                </label>
+              <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-[#464554]">Session frequency</span>
                   <select value={sessionFrequency} onChange={(event) => setSessionFrequency(event.target.value)} className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white">
                     {sessionFrequencyOptions.map((option) => (
                       <option key={option} value={option}>
-                        {option || "Optional"}
+                        {option || "Select frequency"}
                       </option>
                     ))}
                   </select>
                 </label>
-                <input value={longTermTarget} onChange={(event) => setLongTermTarget(event.target.value)} placeholder="Long-term target" className="h-12 rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
-                <input value={nextSessionFocus} onChange={(event) => setNextSessionFocus(event.target.value)} placeholder="Next session focus" className="h-12 rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-[#464554]">Main learning priority</span>
+                  <select value={mainLearningPriority} onChange={(event) => setMainLearningPriority(event.target.value)} className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white">
+                    {mainLearningPriorityOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option || "Select priority"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-[#464554]">Homework status</span>
+                  <select value={homeworkStatus} onChange={(event) => setHomeworkStatus(event.target.value)} className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white">
+                    {homeworkStatusOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option || "Select status"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-2 md:col-span-2">
+                  <span className="text-sm font-semibold text-[#464554]">Current homework / platform</span>
+                  <input value={currentHomework} onChange={(event) => setCurrentHomework(event.target.value)} placeholder="e.g. Cognito, worksheets, reading practice" className="h-12 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-[#464554]">Next session focus</span>
+                  <select value={nextSessionFocusPreset} onChange={(event) => setNextSessionFocusPreset(event.target.value)} className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white">
+                    {nextSessionFocusOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option || "Select focus"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-[#464554]">Long-term goal</span>
+                  <select value={longTermTargetPreset} onChange={(event) => setLongTermTargetPreset(event.target.value)} className="h-12 w-full rounded-xl border border-[#c7c4d7] bg-white px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white">
+                    {longTermGoalOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option || "Select goal"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {nextSessionFocusPreset === "Custom" ? (
+                  <label className="space-y-2 md:col-span-2">
+                    <span className="text-sm font-semibold text-[#464554]">Custom next session focus</span>
+                    <input value={nextSessionFocusCustom} onChange={(event) => setNextSessionFocusCustom(event.target.value)} placeholder="Add a specific next step" className="h-12 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
+                  </label>
+                ) : null}
+                {longTermTargetPreset === "Custom" ? (
+                  <label className="space-y-2 md:col-span-2">
+                    <span className="text-sm font-semibold text-[#464554]">Custom long-term goal</span>
+                    <input value={longTermTargetCustom} onChange={(event) => setLongTermTargetCustom(event.target.value)} placeholder="Set a custom long-term goal" className="h-12 w-full rounded-xl border border-[#c7c4d7] px-4 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
+                  </label>
+                ) : null}
               </div>
-              <textarea value={tutorNotes} onChange={(event) => setTutorNotes(event.target.value)} rows={3} placeholder="Tutor notes" className="mt-4 w-full rounded-xl border border-[#c7c4d7] px-4 py-3 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
+              <textarea value={tutorNotes} onChange={(event) => setTutorNotes(event.target.value)} rows={2} placeholder="Private tutor notes, optional." className="mt-4 w-full rounded-xl border border-[#c7c4d7] px-4 py-3 outline-none transition focus:border-[#4648d4] focus:bg-[#fcf8ff] focus:ring-4 focus:ring-[#e1e0ff] focus:ring-offset-2 focus:ring-offset-white" />
             </Card>
           </section>
 

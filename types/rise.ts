@@ -23,6 +23,7 @@ export type ChildProfile = {
   currentWorkingLevel: string;
   targetLevel: string;
   mainGoals?: string;
+  mainLearningPriority?: string;
   confidenceLevel?: number;
   strengths?: string[];
   struggles?: string[];
@@ -36,6 +37,7 @@ export type ChildProfile = {
   parentReportPreference?: "email" | "whatsapp" | "pdf" | "copy";
   currentHomework?: string;
   homeworkDueDate?: string;
+  homeworkStatus?: string;
   longTermGoal?: string;
   longTermTarget?: string;
   sessionFrequency?: string;
@@ -108,6 +110,20 @@ export type ParentReport = {
   generatedAt: string;
 };
 
+export type ReportSections = {
+  title?: string;
+  sentStatus?: string;
+  sentTo?: string;
+  priorityTag?: string;
+  todayFocus?: string;
+  whatWentWell?: string;
+  stillNeedsSupport?: string;
+  confidence?: string;
+  homework?: string;
+  nextFocus?: string;
+  tutorSummary?: string;
+};
+
 export type RiseStore = {
   tutor: Tutor;
   children: ChildProfile[];
@@ -138,6 +154,7 @@ export type StudentRow = {
   current_grade: string | null;
   target_grade: string | null;
   goals: string | null;
+  main_learning_priority: string | null;
   strengths: string[] | null;
   struggles: string[] | null;
   current_topics: string[] | null;
@@ -149,6 +166,7 @@ export type StudentRow = {
   parent_report_preference: string | null;
   current_homework: string | null;
   homework_due_date: string | null;
+  homework_status: string | null;
   session_frequency: string | null;
   long_term_target: string | null;
   next_session_focus: string | null;
@@ -188,6 +206,7 @@ export type ReportRow = {
   session_id: string | null;
   title: string;
   body: string | null;
+  report_sections?: ReportSections | null;
   sent_status: string | null;
   sent_to: string | null;
   sent_at: string | null;

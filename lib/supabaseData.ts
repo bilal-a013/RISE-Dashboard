@@ -1,6 +1,20 @@
 import { supabase } from "./supabase";
 import { generateTutorKey } from "./tutorKey";
-import type { ChildProfile, ParentReport, ReportRow, SessionLog, SessionRow, StudentRow } from "../types/rise";
+import { generateParentReport } from "./reportGenerator";
+import {
+  reportSectionsFromParentReport,
+  reportSectionsToParentReport,
+  reportSectionsToPlainText,
+} from "./reportGenerator";
+import type {
+  ChildProfile,
+  ParentReport,
+  ReportRow,
+  ReportSections,
+  SessionLog,
+  SessionRow,
+  StudentRow,
+} from "../types/rise";
 
 function requireSupabase() {
   if (!supabase) {
@@ -108,6 +122,7 @@ export function studentRowToChildProfile(row: StudentRow): ChildProfile {
     currentGrade: row.current_grade ?? undefined,
     targetGrade: row.target_grade ?? undefined,
     mainGoals: row.goals ?? undefined,
+    mainLearningPriority: row.main_learning_priority ?? row.goals ?? undefined,
     confidenceLevel: 3,
     strengths: row.strengths ?? [],
     struggles: row.struggles ?? [],
@@ -121,6 +136,7 @@ export function studentRowToChildProfile(row: StudentRow): ChildProfile {
     preferredReportMethod: (row.parent_report_preference as ChildProfile["preferredReportMethod"]) ?? undefined,
     currentHomework: row.current_homework ?? undefined,
     homeworkDueDate: row.homework_due_date ?? undefined,
+    homeworkStatus: row.homework_status ?? undefined,
     sessionFrequency: row.session_frequency ?? undefined,
     longTermGoal: row.long_term_target ?? undefined,
     longTermTarget: row.long_term_target ?? undefined,
@@ -224,6 +240,7 @@ export async function upsertStudent(child: ChildProfile) {
     current_grade: child.currentWorkingLevel,
     target_grade: child.targetLevel,
     goals: cleanText(child.mainGoals),
+    main_learning_priority: cleanText(child.mainLearningPriority || child.mainGoals),
     strengths: cleanArray(child.strengths),
     struggles: cleanArray(child.struggles),
     current_topics: cleanArray(child.currentTopics),
@@ -235,6 +252,7 @@ export async function upsertStudent(child: ChildProfile) {
     parent_report_preference: child.parentReportPreference || child.preferredReportMethod || null,
     current_homework: cleanText(child.currentHomework),
     homework_due_date: cleanText(child.homeworkDueDate) || null,
+    homework_status: cleanText(child.homeworkStatus),
     session_frequency: cleanText(child.sessionFrequency),
     long_term_target: cleanText(child.longTermTarget || child.longTermGoal),
     next_session_focus: cleanText(child.nextSessionFocus),
@@ -354,17 +372,52 @@ function reportBody(report: ParentReport) {
   ].join("\n");
 }
 
+function parseStoredReportBody(body: string | null) {
+  if (!body) return null;
+  try {
+    return JSON.parse(body) as {
+      parentReport?: ParentReport;
+      plainText?: string;
+      reportSections?: ReportSections;
+    };
+  } catch {
+    return null;
+  }
+}
+
+function reportRowToSections(row: ReportRow) {
+  if (row.report_sections && typeof row.report_sections === "object") {
+    return row.report_sections;
+  }
+
+  const parsed = parseStoredReportBody(row.body);
+  if (parsed?.reportSections) {
+    return parsed.reportSections;
+  }
+
+  if (parsed?.parentReport) {
+    return reportSectionsFromParentReport(parsed.parentReport);
+  }
+
+  return null;
+}
+
 export async function insertReport(report: ParentReport, session: SessionLog, child: ChildProfile) {
   const client = requireSupabase();
   const tutorId = session.tutorId || child.tutorId || (await getCurrentUserId());
   const reportId = isUuid(report.id) ? report.id : crypto.randomUUID();
+  const reportSections = reportSectionsFromParentReport(report, {
+    sentStatus: "draft",
+    sentTo: child.parentEmail || undefined,
+  });
   const row = {
     id: reportId,
     student_id: child.id,
     tutor_id: tutorId,
     session_id: session.id,
     title: report.title,
-    body: JSON.stringify({ parentReport: report, plainText: reportBody(report) }),
+    body: reportSectionsToPlainText(child, session, report, reportSections),
+    report_sections: reportSections,
     sent_status: "draft",
     sent_to: child.parentEmail || null,
   };
@@ -379,6 +432,7 @@ export async function updateReport(
   updates: Partial<{
     title: string;
     body: string | null;
+    report_sections: ReportSections | null;
     sent_status: string | null;
     sent_to: string | null;
     sent_at: string | null;
@@ -438,6 +492,7 @@ export async function getReportBundle(reportId: string) {
   if (reportError) throw reportError;
 
   const reportRow = report as ReportRow;
+  const reportSections = reportRowToSections(reportRow);
   const [child, sessions] = await Promise.all([
     getStudent(reportRow.student_id),
     listSessions(reportRow.student_id),
@@ -446,10 +501,19 @@ export async function getReportBundle(reportId: string) {
   let parentReport: ParentReport | null = null;
 
   try {
-    parentReport = reportRow.body ? JSON.parse(reportRow.body).parentReport : null;
+    const parsed = parseStoredReportBody(reportRow.body);
+    parentReport = parsed?.parentReport ?? null;
   } catch {
     parentReport = null;
   }
 
-  return { reportRow, parentReport, child, session, sessions };
+  if (!parentReport && reportSections && session) {
+    parentReport = reportSectionsToParentReport(child, session, reportSections, null);
+  }
+
+  if (!parentReport && session) {
+    parentReport = generateParentReport(child, session, sessions);
+  }
+
+  return { reportRow, parentReport, reportSections, child, session, sessions };
 }

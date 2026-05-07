@@ -1,4 +1,4 @@
-import type { ChildProfile, ParentReport, Rating, ReportTone, SessionLog } from "../types/rise";
+import type { ChildProfile, ParentReport, Rating, ReportSections, ReportTone, SessionLog } from "../types/rise";
 
 export const progressLabels: Record<Rating, string> = {
   1: "Needs support",
@@ -38,6 +38,108 @@ function formatList(values: string[]) {
   if (!values.length) return "today's focus";
   if (values.length === 1) return values[0];
   return `${values.slice(0, -1).join(", ")} and ${values.at(-1)}`;
+}
+
+function confidenceToSentence(value?: string) {
+  const confidence = (value ?? "").toLowerCase();
+  if (confidence.startsWith("low")) return "Confidence was low and the next step is more guided practice.";
+  if (confidence.startsWith("develop") || confidence.startsWith("slight")) return "Confidence is developing with support and repetition.";
+  if (confidence.startsWith("steady")) return "Confidence was steady after examples were modelled.";
+  if (confidence.startsWith("good")) return "Confidence was good and the student worked independently for parts of the session.";
+  if (confidence.startsWith("high")) return "Confidence was high and the student worked independently with clear understanding.";
+  if (confidence.startsWith("strong")) return "Confidence was strong and the student worked independently with clear understanding.";
+  return value || "Confidence is still building.";
+}
+
+function confidenceToSelection(value?: string) {
+  const confidence = (value ?? "").toLowerCase();
+  if (confidence.startsWith("low")) return "Low";
+  if (confidence.startsWith("slight")) return "Developing";
+  if (confidence.startsWith("steady")) return "Steady";
+  if (confidence.startsWith("good")) return "Good";
+  if (confidence.startsWith("high") || confidence.startsWith("strong")) return "Strong";
+  return value || "Steady";
+}
+
+function splitIntoPoints(value?: string) {
+  return (value ?? "")
+    .split(/\n+/)
+    .map((part) => part.replace(/^\s*[-*•]\s*/, "").trim())
+    .filter(Boolean);
+}
+
+export function reportSectionsFromParentReport(
+  report: ParentReport,
+  options?: {
+    sentStatus?: string;
+    sentTo?: string;
+    priorityTag?: string;
+  }
+): ReportSections {
+  return {
+    title: report.title,
+    sentStatus: options?.sentStatus,
+    sentTo: options?.sentTo,
+    priorityTag: options?.priorityTag,
+    todayFocus: report.todayFocus,
+    whatWentWell: report.whatWentWell.join("\n"),
+    stillNeedsSupport: report.stillNeedsSupport,
+    confidence: confidenceToSelection(report.progressSnapshot.confidenceLabel),
+    homework: report.homeworkAssigned,
+    nextFocus: report.nextSessionFocus,
+    tutorSummary: report.tutorSummary,
+  };
+}
+
+export function reportSectionsToParentReport(
+  child: ChildProfile,
+  session: SessionLog,
+  sections: ReportSections,
+  fallback?: ParentReport | null
+): ParentReport {
+  const generatedFallback = fallback ?? generateParentReport(child, session, [session]);
+  const whatWentWell = splitIntoPoints(sections.whatWentWell).length ? splitIntoPoints(sections.whatWentWell) : generatedFallback.whatWentWell;
+  return {
+    ...generatedFallback,
+    title: sections.title?.trim() || generatedFallback.title,
+    todayFocus: sections.todayFocus?.trim() || generatedFallback.todayFocus,
+    whatWentWell,
+    stillNeedsSupport: sections.stillNeedsSupport?.trim() || generatedFallback.stillNeedsSupport,
+    confidenceUnderstanding: confidenceToSentence(sections.confidence) || generatedFallback.confidenceUnderstanding,
+    homeworkAssigned: sections.homework?.trim() || generatedFallback.homeworkAssigned,
+    nextSessionFocus: sections.nextFocus?.trim() || generatedFallback.nextSessionFocus,
+    tutorSummary: sections.tutorSummary?.trim() || generatedFallback.tutorSummary,
+  };
+}
+
+export function reportSectionsToPlainText(
+  child: ChildProfile,
+  session: SessionLog,
+  report: ParentReport,
+  sections?: ReportSections
+) {
+  const title = sections?.title?.trim() || report.title;
+  const priority = sections?.priorityTag?.trim();
+  return [
+    title,
+    priority ? `Priority: ${priority}` : null,
+    "",
+    `Student: ${child.fullName}`,
+    `Date: ${new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(session.sessionDate))}`,
+    `Topic: ${session.topic}`,
+    `Current level: ${report.progressSnapshot.currentWorkingLevel} → ${report.progressSnapshot.targetLevel}`,
+    "",
+    `Today's focus: ${report.todayFocus}`,
+    `What went well: ${report.whatWentWell.join(" • ")}`,
+    `Still needs support: ${report.stillNeedsSupport}`,
+    `Confidence: ${report.confidenceUnderstanding}`,
+    `Homework: ${report.homeworkAssigned}`,
+    `Next focus: ${report.nextSessionFocus}`,
+    "",
+    `Tutor summary: ${report.tutorSummary}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function generateParentReport(

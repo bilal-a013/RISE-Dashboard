@@ -27,6 +27,7 @@ create table if not exists students (
   struggles text[] default '{}',
   current_topics text[] default '{}',
   learning_style text,
+  main_learning_priority text,
   parent_name text,
   parent_relationship text,
   parent_email text,
@@ -34,6 +35,7 @@ create table if not exists students (
   parent_report_preference text,
   current_homework text,
   homework_due_date date,
+  homework_status text,
   session_frequency text,
   long_term_target text,
   next_session_focus text,
@@ -60,6 +62,7 @@ alter table students add column if not exists strengths text[] default '{}';
 alter table students add column if not exists struggles text[] default '{}';
 alter table students add column if not exists current_topics text[] default '{}';
 alter table students add column if not exists learning_style text;
+alter table students add column if not exists main_learning_priority text;
 alter table students add column if not exists parent_name text;
 alter table students add column if not exists parent_relationship text;
 alter table students add column if not exists parent_email text;
@@ -67,6 +70,7 @@ alter table students add column if not exists parent_phone text;
 alter table students add column if not exists parent_report_preference text;
 alter table students add column if not exists current_homework text;
 alter table students add column if not exists homework_due_date date;
+alter table students add column if not exists homework_status text;
 alter table students add column if not exists session_frequency text;
 alter table students add column if not exists long_term_target text;
 alter table students add column if not exists next_session_focus text;
@@ -113,11 +117,14 @@ create table if not exists reports (
   session_id uuid references sessions(id) on delete set null,
   title text not null,
   body text,
+  report_sections jsonb default '{}'::jsonb,
   sent_status text default 'draft',
   sent_to text,
   sent_at timestamp with time zone,
   created_at timestamp with time zone default now()
 );
+
+alter table reports add column if not exists report_sections jsonb default '{}'::jsonb;
 
 create table if not exists parent_replies (
   id uuid primary key default gen_random_uuid(),
