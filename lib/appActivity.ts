@@ -1,5 +1,6 @@
 import type {
   ChildProfile,
+  HomeworkTaskRow,
   LessonAttemptRow,
   StudentAppActivityRow,
   StudentAppActivitySummary,
@@ -158,7 +159,7 @@ export function emptyAppActivitySummary(unavailableReason?: string): StudentAppA
   });
 }
 
-async function resolveChildProfileId(client: SupabaseClientLike, student: ChildProfile) {
+export async function resolveChildProfileId(client: SupabaseClientLike, student: ChildProfile) {
   if (student.childProfileId) return student.childProfileId;
 
   if (student.tutorKey) {
@@ -192,6 +193,40 @@ async function resolveChildProfileId(client: SupabaseClientLike, student: ChildP
   }
 
   return (data as { id?: string | null } | null)?.id ?? null;
+}
+
+async function readHomeworkTasks(client: SupabaseClientLike, childProfileId: string) {
+  const { data, error } = await client
+    .from("homework_tasks")
+    .select("id, child_profile_id, title, instructions, status, student_note, due_date, completed_at, created_at, updated_at")
+    .eq("child_profile_id", childProfileId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    if (isRecoverableAppActivityReadError(error)) return [];
+    throw error;
+  }
+
+  return (data ?? []) as HomeworkTaskRow[];
+}
+
+export async function getStudentHomeworkTasksForClient(client: SupabaseClientLike, student: ChildProfile) {
+  const childProfileId = await resolveChildProfileId(client, student);
+  if (!childProfileId) return [];
+  return readHomeworkTasks(client, childProfileId);
+}
+
+export async function getStudentHomeworkTasks(student: ChildProfile): Promise<HomeworkTaskRow[]> {
+  const { supabase } = await import("./supabase");
+
+  if (!supabase) return [];
+
+  try {
+    return await getStudentHomeworkTasksForClient(supabase, student);
+  } catch (error) {
+    if (isRecoverableAppActivityReadError(error as SupabaseErrorLike)) return [];
+    return [];
+  }
 }
 
 async function readRecentActivity(client: SupabaseClientLike, childProfileId: string) {

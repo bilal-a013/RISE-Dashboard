@@ -9,15 +9,16 @@ import { ProtectedContent } from "../../../components/rise/AuthProvider";
 import { BrandButton } from "../../../components/rise/BrandButton";
 import { Card } from "../../../components/rise/Card";
 import { Footer } from "../../../components/rise/Footer";
+import { HomeworkStatusCard } from "../../../components/rise/HomeworkStatusCard";
 import { ProgressSegments } from "../../../components/rise/ProgressSegments";
 import { ReportSectionCard } from "../../../components/rise/ReportSectionCard";
 import { TopNav } from "../../../components/rise/TopNav";
 import { useToast } from "../../../components/rise/ToastProvider";
 import { TutorKeyBadge } from "../../../components/rise/TutorKeyBadge";
-import { getStudentAppActivitySummary } from "../../../lib/appActivity";
+import { getStudentAppActivitySummary, getStudentHomeworkTasks } from "../../../lib/appActivity";
 import { getStudent, listReports, listSessions } from "../../../lib/supabaseData";
 import { initialsFromName } from "../../../lib/tutorKey";
-import type { ChildProfile, ReportRow, SessionLog, StudentAppActivitySummary } from "../../../types/rise";
+import type { ChildProfile, HomeworkTaskRow, ReportRow, SessionLog, StudentAppActivitySummary } from "../../../types/rise";
 
 export default function StudentOverviewPage() {
   const params = useParams<{ studentId: string }>();
@@ -25,6 +26,7 @@ export default function StudentOverviewPage() {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [appActivity, setAppActivity] = useState<StudentAppActivitySummary | null>(null);
+  const [homeworkTasks, setHomeworkTasks] = useState<HomeworkTaskRow[] | null>(null);
   const [status, setStatus] = useState("Loading student...");
   const { toast } = useToast();
 
@@ -36,11 +38,15 @@ export default function StudentOverviewPage() {
           listSessions(params.studentId),
           listReports(params.studentId),
         ]);
-        const activityData = await getStudentAppActivitySummary(child, sessionData[0]?.sessionDate);
+        const [activityData, homeworkData] = await Promise.all([
+          getStudentAppActivitySummary(child, sessionData[0]?.sessionDate),
+          getStudentHomeworkTasks(child),
+        ]);
         setStudent(child);
         setSessions(sessionData);
         setReports(reportData);
         setAppActivity(activityData);
+        setHomeworkTasks(homeworkData);
         setStatus("");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Could not load student.");
@@ -191,6 +197,7 @@ export default function StudentOverviewPage() {
                   <p className="mt-2 text-sm leading-6 text-[var(--rise-text-muted)]">{student.nextSessionFocus || "No next focus added yet."}</p>
                 </div>
               </Card>
+              <HomeworkStatusCard tasks={homeworkTasks} />
               <AppActivityCard summary={appActivity} />
             </div>
           </section>

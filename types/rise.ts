@@ -237,6 +237,21 @@ export type StudentAppActivityRow = {
   created_at: string | null;
 };
 
+export type HomeworkTaskStatus = "not_started" | "in_progress" | "completed" | "need_help";
+
+export type HomeworkTaskRow = {
+  id: string;
+  child_profile_id: string;
+  title: string;
+  instructions: string | null;
+  status: HomeworkTaskStatus;
+  student_note: string | null;
+  due_date: string | null;
+  completed_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
 export type StudentProgressRow = {
   id: string;
   child_profile_id: string;
