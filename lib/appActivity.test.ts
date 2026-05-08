@@ -14,8 +14,13 @@ import {
 describe("app activity helpers", () => {
   it("normalises and hashes tutor keys the same way as the student app bridge", async () => {
     assert.equal(normalizeTutorKey(" rise-cdx7 "), "RISE-CDX7");
+    assert.equal(normalizeTutorKey(" rise cdx7 "), "RISE-CDX7");
     assert.equal(
       await hashTutorKey(" rise-cdx7 "),
+      "c69a975dc80ef867f2046408e14baa80f0d006611d54a272cd7b8e13024c1a6a"
+    );
+    assert.equal(
+      await hashTutorKey(" rise cdx7 "),
       "c69a975dc80ef867f2046408e14baa80f0d006611d54a272cd7b8e13024c1a6a"
     );
   });

@@ -6,6 +6,7 @@ import type {
   StudentAppActivitySummary,
   StudentProgressRow,
 } from "../types/rise";
+import { hashTutorKey as hashSharedTutorKey, normaliseTutorKey } from "./tutorKey";
 
 type SupabaseClientLike = {
   from: (table: string) => any;
@@ -26,13 +27,11 @@ type ActivityTimestampOptions = {
 const RECOVERABLE_READ_ERROR_CODES = new Set(["42P01", "42703", "42501", "PGRST200", "PGRST205"]);
 
 export function normalizeTutorKey(tutorKey: string) {
-  return tutorKey.trim().toUpperCase();
+  return normaliseTutorKey(tutorKey);
 }
 
 export async function hashTutorKey(tutorKey: string) {
-  const normalized = normalizeTutorKey(tutorKey);
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return hashSharedTutorKey(tutorKey);
 }
 
 export function isRecoverableAppActivityReadError(error: SupabaseErrorLike | null | undefined) {
